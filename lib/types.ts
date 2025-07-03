@@ -2,7 +2,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  role: 'EXPLORER' | 'ADMIN';
+  role: 'EXPLORER' | 'ABROADER';
   currentCity: string | null;
   currentCountry: string | null;
   targetCountry: string | null;
@@ -40,7 +40,7 @@ export interface Post {
     id: string;
     username: string;
     avatar: string | null;
-    role: 'EXPLORER' | 'ADMIN';
+    role: 'EXPLORER' | 'ABROADER';
   };
   city: {
     id: string;
@@ -89,7 +89,7 @@ export interface Comment {
     id: string;
     username: string;
     avatar?: string | null;
-    role: 'EXPLORER' | 'ADMIN';
+    role: 'EXPLORER' | 'ABROADER';
   };
   // Nested replies - full Comment objects, not just IDs
   replies?: Comment[];
@@ -168,7 +168,7 @@ export interface RegisterRequest {
   email: string;
   username: string;
   password: string;
-  role?: 'EXPLORER' | 'ADMIN';
+  role?: 'EXPLORER' | 'ABROADER';
 }
 
 export interface LoginResponse {
@@ -227,7 +227,7 @@ export interface Room {
     id: string;
     username: string;
     avatar?: string | null;
-    role: 'EXPLORER' | 'ADMIN';
+    role: 'EXPLORER' | 'ABROADER';
   };
   // Optional/computed fields
   recentMessages?: Message[];
@@ -246,7 +246,7 @@ export interface Message {
     id: string;
     username: string;
     avatar?: string;
-    role: 'EXPLORER' | 'ADMIN';
+    role: 'EXPLORER' | 'ABROADER';
   };
   createdAt: string;
   updatedAt: string;

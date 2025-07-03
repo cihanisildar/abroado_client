@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 import {
   DropdownMenu,
@@ -13,23 +13,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Home,
+  LogOut,
   MapPin,
   MessageSquare,
-  Users,
-  User,
-  LogOut,
   Plus,
-  Settings,
   Search,
+  Settings,
+  User,
+  Users,
 } from "lucide-react";
 
-import logo from "../public/signaling_18391003.png";
-import Image from "next/image";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
+import logo from "../public/signaling_18391003.png";
 
 export function Header() {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
-  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -60,12 +59,8 @@ export function Header() {
     }
   };
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Don't render anything until mounted (prevents SSR issues)
-  if (!mounted || isLoading) {
+  // Don't render anything until auth state is loaded
+  if (isLoading) {
     return null;
   }
 
@@ -175,7 +170,13 @@ export function Header() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={() => logout.mutate()}
+                onClick={() => {
+                  logout.mutate(undefined, {
+                    onSuccess: () => {
+                      router.replace('/auth/login');
+                    },
+                  });
+                }}
                 className="text-red-600 hover:bg-red-50"
               >
                 <div className="flex items-center space-x-2">
