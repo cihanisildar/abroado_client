@@ -188,7 +188,9 @@ export interface AuthResponse {
 export interface RegisterResponse {
   success: boolean;
   message: string;
-  data: null;
+  data: {
+    user: User;
+  };
 }
 
 export interface ErrorResponse {

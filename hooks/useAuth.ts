@@ -33,7 +33,7 @@ export const useAuth = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      // Only set user data in React Query cache - token is in httpOnly cookie
+      // Set user data in React Query cache - token is in httpOnly cookie
       queryClient.setQueryData(['auth', 'user'], data.data.user);
     },
   });
@@ -44,8 +44,8 @@ export const useAuth = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      // Registration successful but user needs to log in separately
-      console.log(data.message);
+      // Backend handles auto-login, so set user data in cache
+      queryClient.setQueryData(['auth', 'user'], data.data.user);
     },
   });
 
@@ -132,7 +132,7 @@ export const useAuth = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: false, // Don't retry auth requests
     refetchOnWindowFocus: false, // Prevent refetch on window focus
-    refetchOnMount: false, // Only fetch once on mount
+    refetchOnMount: true, // Allow refetch on mount to ensure fresh data
     refetchOnReconnect: false, // Don't refetch on reconnect
     enabled: !isPublicRoute, // Only run query on protected routes
   });

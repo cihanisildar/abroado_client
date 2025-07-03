@@ -2,7 +2,6 @@
 
 import { Header } from '@/components/Header'
 import { useAuth } from '@/hooks/useAuth'
-import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { connectSocket } from '@/lib/socket'
 
@@ -18,18 +17,13 @@ export default function ProtectedLayout({
   children: React.ReactNode
 }) {
   const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
 
   useEffect(() => {
-    // Only redirect if we're not loading and user is not authenticated
-    if (!isLoading && !isAuthenticated) {
-      const currentPath = window.location.pathname + window.location.search;
-      router.replace(`/auth/login?redirectTo=${encodeURIComponent(currentPath)}`);
-    } else if (!isLoading && isAuthenticated) {
-      // Establish socket connection once authenticated
+    // Establish socket connection once authenticated
+    if (!isLoading && isAuthenticated) {
       connectSocket();
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading]);
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -43,11 +37,7 @@ export default function ProtectedLayout({
     );
   }
 
-  // Don't render content if not authenticated (will redirect)
-  if (!isAuthenticated) {
-    return null;
-  }
-
+  // Since middleware handles auth checks, we can trust we're authenticated here
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />

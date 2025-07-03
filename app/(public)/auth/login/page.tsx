@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import toast from 'react-hot-toast';
@@ -16,7 +15,6 @@ interface AxiosErrorResponse {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
@@ -35,8 +33,8 @@ export default function LoginPage() {
       
       if (result.success) {
         toast.success('Welcome back! Redirecting...');
-        // Always redirect to home page after successful login
-        router.push('/');
+        // Use window.location for a full page reload to ensure proper auth state
+        window.location.href = '/';
       }
     } catch (error) {
       toast.dismiss(loadingToast);

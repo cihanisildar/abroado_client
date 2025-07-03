@@ -129,10 +129,10 @@ export default function RegisterPage() {
     try {
       const result = await register.mutateAsync(formData);
       toast.dismiss(loadingToast);
-
+      
       if (result.success) {
-        toast.success("Account created successfully! Redirecting...");
-        // Use window.location for a full page reload after registration
+        toast.success("Account created successfully! Welcome to Gurbetlik!");
+        // Backend handles auto-login, so we can redirect immediately
         window.location.href = "/";
       }
     } catch (error) {
