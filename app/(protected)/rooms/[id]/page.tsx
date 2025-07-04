@@ -193,10 +193,11 @@ export default function RoomChatPage({ params }: RoomChatPageProps) {
     
     try {
       // Persist message via REST API (returns the saved message)
-      const savedMessage = await sendMessageMutation.mutateAsync({
+      const response = await sendMessageMutation.mutateAsync({
         roomId: room.id,
         content: messageContent,
       });
+      const savedMessage = response.data; // <-- Only the message object
 
       // Emit through websocket so other clients receive it instantly
       socket.emit('send_message', {
@@ -212,9 +213,9 @@ export default function RoomChatPage({ params }: RoomChatPageProps) {
       setMessage('');
 
       // Only show success toast for longer messages to avoid spam
-      if (messageContent.length > 10) {
-        toast.success('Message sent! 💬');
-      }
+      // if (messageContent.length > 10) {
+      //   toast.success('Message sent! 💬');
+      // }
     } catch (error: unknown) {
       console.error('Failed to send message:', error);
       toast.error('Failed to send message');

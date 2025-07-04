@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 
 export default function EditProfilePage() {
   const { user, isLoading: isUserLoading, updateProfile } = useAuth();
@@ -123,14 +124,6 @@ export default function EditProfilePage() {
       newErrors.bio = 'Bio must be less than 500 characters';
     }
 
-    if (!formData.currentCity) {
-      newErrors.currentCity = 'Current city is required';
-    }
-
-    if (!formData.currentCountry || formData.currentCountry === 'none') {
-      newErrors.currentCountry = 'Current country is required';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -158,6 +151,7 @@ export default function EditProfilePage() {
         form.append('avatar', fileInput.files[0]);
       }
       await updateProfile.mutateAsync(form);
+      toast.success('Profile updated successfully! ✨');
       router.push('/profile');
     } catch (err: unknown) {
       setErrors({ general: err instanceof Error ? err.message : 'Failed to update profile' });
@@ -305,16 +299,16 @@ export default function EditProfilePage() {
             <CardContent className="space-y-3 sm:space-y-4">
               {/* Current Country */}
               <div>
-                <Label htmlFor="currentCountry" className="text-sm">Current Country *</Label>
+                <Label htmlFor="currentCountry" className="text-sm">Current Country (Optional)</Label>
                 <Select
                   value={formData.currentCountry || 'none'}
                   onValueChange={handleCountryChange}
                 >
-                  <SelectTrigger className={`text-sm sm:text-base ${errors.currentCountry ? 'border-red-500' : ''}`}>
+                  <SelectTrigger className="text-sm sm:text-base">
                     <SelectValue placeholder="Select your current country" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Select a country</SelectItem>
+                    <SelectItem value="none">No country selected</SelectItem>
                     {countries.map((country, index) => (
                       <SelectItem key={country.code || country.name || index} value={country.name}>
                         {country.name}
@@ -322,25 +316,22 @@ export default function EditProfilePage() {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.currentCountry && (
-                  <p className="text-xs sm:text-sm text-red-600 mt-1">{errors.currentCountry}</p>
-                )}
               </div>
 
               {/* Current City */}
               <div>
-                <Label htmlFor="currentCity" className="text-sm">Current City *</Label>
+                <Label htmlFor="currentCity" className="text-sm">Current City (Optional)</Label>
                 {formData.currentCountry && formData.currentCountry !== 'none' ? (
                   <Select
                     value={formData.currentCityId || 'none'}
                     onValueChange={handleCityChange}
                     disabled={isCitiesLoading}
                   >
-                    <SelectTrigger className={`text-sm sm:text-base ${errors.currentCity ? 'border-red-500' : ''}`}>
+                    <SelectTrigger className="text-sm sm:text-base">
                       <SelectValue placeholder={isCitiesLoading ? "Loading cities..." : "Select your current city"} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">Select a city</SelectItem>
+                      <SelectItem value="none">No city selected</SelectItem>
                       {cities.map((city) => (
                         <SelectItem key={city.id} value={city.id}>
                           {city.name}
@@ -350,11 +341,8 @@ export default function EditProfilePage() {
                   </Select>
                 ) : (
                   <div className="text-xs sm:text-sm text-gray-500 p-3 border border-gray-200 rounded-md bg-gray-50">
-                    Please select a country first
+                    Please select a country first to choose a city
                   </div>
-                )}
-                {errors.currentCity && (
-                  <p className="text-xs sm:text-sm text-red-600 mt-1">{errors.currentCity}</p>
                 )}
               </div>
 

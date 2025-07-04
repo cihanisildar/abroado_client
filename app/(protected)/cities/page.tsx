@@ -513,7 +513,7 @@ export default function CitiesPage() {
                           {/* Header */}
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 mb-2 sm:mb-3">
                             <div className="flex-1 min-w-0">
-                              <Link href={`/cities/reviews/${review.id}`}>
+                              <Link href={`/cities/${review.id}`}>
                                 <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 hover:text-orange-600 transition-colors line-clamp-2">
                                   {review.title}
                                 </h3>
@@ -691,7 +691,7 @@ export default function CitiesPage() {
 
                           {/* Action Buttons */}
                           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-                            <Link href={`/cities/reviews/${review.id}`}>
+                            <Link href={`/cities/${review.id}`}>
                               <Button
                                 variant="ghost"
                                 size="sm"

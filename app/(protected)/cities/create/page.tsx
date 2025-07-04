@@ -237,67 +237,67 @@ export default function CreateCityReviewPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 sm:space-y-6">
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">
-                      Country *
-                    </Label>
-                    <Select
-                      value={form.country || 'none'}
-                      onValueChange={handleCountryChange}
-                    >
-                      <SelectTrigger className="mt-1 h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                        <SelectValue placeholder="Select a country" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem key="none" value="none">Select a country</SelectItem>
-                        {countries
-                          .filter((c) => c.name)
-                          .map((country, idx) => (
-                            <SelectItem 
-                              key={`country-${country.name}-${idx}`}
-                              value={country.name}
-                            >
-                              {country.name}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1">
+                      <Label className="text-sm font-medium text-gray-700">
+                        Country *
+                      </Label>
+                      <Select
+                        value={form.country || 'none'}
+                        onValueChange={handleCountryChange}
+                      >
+                        <SelectTrigger className="mt-1 h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent w-full">
+                          <SelectValue placeholder="Select a country" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem key="none" value="none">Select a country</SelectItem>
+                          {countries
+                            .filter((c) => c.name)
+                            .map((country, idx) => (
+                              <SelectItem 
+                                key={`country-${country.name}-${idx}`}
+                                value={country.name}
+                              >
+                                {country.name}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex-1">
+                      <Label className="text-sm font-medium text-gray-700">
+                        City *
+                      </Label>
+                      <Select
+                        value={form.cityId || 'none'}
+                        onValueChange={handleCityChange}
+                        disabled={!form.country}
+                      >
+                        <SelectTrigger className="mt-1 h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent w-full">
+                          <SelectValue placeholder={
+                            !form.country 
+                              ? 'Select a country first' 
+                              : cities.length === 0 
+                                ? 'No cities found' 
+                                : 'Select a city'
+                          } />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem key="none" value="none">Select a city</SelectItem>
+                          {cities.map((city) => (
+                            <SelectItem key={`city-${city.id}`} value={city.id}>
+                              {city.name}
                             </SelectItem>
                           ))}
-                      </SelectContent>
-                    </Select>
+                        </SelectContent>
+                      </Select>
+                      {form.country && cities.length === 0 && (
+                        <p className="mt-2 text-sm text-yellow-600">
+                          No cities found for this country. Please try a different country.
+                        </p>
+                      )}
+                    </div>
                   </div>
-
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">
-                      City *
-                    </Label>
-                    <Select
-                      value={form.cityId || 'none'}
-                      onValueChange={handleCityChange}
-                      disabled={!form.country}
-                    >
-                      <SelectTrigger className="mt-1 h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                        <SelectValue placeholder={
-                          !form.country 
-                            ? 'Select a country first' 
-                            : cities.length === 0 
-                              ? 'No cities found' 
-                              : 'Select a city'
-                        } />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem key="none" value="none">Select a city</SelectItem>
-                        {cities.map((city) => (
-                          <SelectItem key={`city-${city.id}`} value={city.id}>
-                            {city.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {form.country && cities.length === 0 && (
-                      <p className="mt-2 text-sm text-yellow-600">
-                        No cities found for this country. Please try a different country.
-                      </p>
-                    )}
-                  </div>
-
                   <div>
                     <Label htmlFor="title" className="text-sm font-medium text-gray-700">
                       Review Title *
@@ -315,6 +315,30 @@ export default function CreateCityReviewPage() {
                     <div className="text-xs text-gray-500 mt-1">
                       {form.title.length}/{TITLE_MAX_LENGTH} characters
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Detailed Review */}
+              <Card className="bg-white rounded-xl sm:rounded-2xl shadow-lg border-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
+                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-500" />
+                    Detailed Review
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    name="note"
+                    value={form.note}
+                    onChange={handleChange}
+                    placeholder="Share your detailed experience, tips, and insights about this city..."
+                    maxLength={NOTE_MAX_LENGTH}
+                    rows={4}
+                    className="text-sm sm:text-base"
+                  />
+                  <div className="text-xs text-gray-500 mt-1">
+                    {(form.note?.length ?? 0)}/{NOTE_MAX_LENGTH} characters
                   </div>
                 </CardContent>
               </Card>
@@ -483,29 +507,7 @@ export default function CreateCityReviewPage() {
                 </CardContent>
               </Card>
 
-              {/* Additional Notes */}
-              <Card className="bg-white rounded-xl sm:rounded-2xl shadow-lg border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-lg sm:text-xl">
-                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-500" />
-                    Additional Notes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    name="note"
-                    value={form.note}
-                    onChange={handleChange}
-                    placeholder="Share any additional thoughts, tips, or experiences that might help others..."
-                    maxLength={NOTE_MAX_LENGTH}
-                    rows={4}
-                    className="text-sm sm:text-base"
-                  />
-                  <div className="text-xs text-gray-500 mt-1">
-                    {(form.note?.length ?? 0)}/{NOTE_MAX_LENGTH} characters
-                  </div>
-                </CardContent>
-              </Card>
+
             </div>
 
             {/* Sidebar */}

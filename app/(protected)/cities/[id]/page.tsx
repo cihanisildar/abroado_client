@@ -163,14 +163,70 @@ export default function CityReviewPage() {
 
   const handleUpvote = () => {
     if (!review) return;
+    
+    // Optimistic update for the single review cache
+    queryClient.setQueryData(["cityReview", review.id], (old: { data: CityReview } | undefined) => {
+      if (!old) return old;
+      const currentVote = old.data.userVote;
+      const newUpvotes = currentVote === 'UPVOTE' ? old.data.upvotes - 1 : old.data.upvotes + 1;
+      const newDownvotes = currentVote === 'DOWNVOTE' ? old.data.downvotes - 1 : old.data.downvotes;
+      const newUserVote = currentVote === 'UPVOTE' ? null : 'UPVOTE';
+      
+      return {
+        ...old,
+        data: { 
+          ...old.data, 
+          upvotes: newUpvotes,
+          downvotes: newDownvotes,
+          userVote: newUserVote
+        },
+      };
+    });
+
+    // Optimistic update for list caches
+    queryClient.setQueryData(["cityReviews", { cityId: review.cityId }], (old: { data: CityReview[] } | undefined) => {
+      if (!old) return old;
+      return {
+        ...old,
+        data: old.data.map((r) => {
+          if (r.id === review.id) {
+            const currentVote = r.userVote;
+            const newUpvotes = currentVote === 'UPVOTE' ? r.upvotes - 1 : r.upvotes + 1;
+            const newDownvotes = currentVote === 'DOWNVOTE' ? r.downvotes - 1 : r.downvotes;
+            const newUserVote = currentVote === 'UPVOTE' ? null : 'UPVOTE';
+            return { ...r, upvotes: newUpvotes, downvotes: newDownvotes, userVote: newUserVote };
+          }
+          return r;
+        }),
+      };
+    });
+
+    queryClient.setQueryData(["allCityReviews"], (old: { data: CityReview[] } | undefined) => {
+      if (!old) return old;
+      return {
+        ...old,
+        data: old.data.map((r) => {
+          if (r.id === review.id) {
+            const currentVote = r.userVote;
+            const newUpvotes = currentVote === 'UPVOTE' ? r.upvotes - 1 : r.upvotes + 1;
+            const newDownvotes = currentVote === 'DOWNVOTE' ? r.downvotes - 1 : r.downvotes;
+            const newUserVote = currentVote === 'UPVOTE' ? null : 'UPVOTE';
+            return { ...r, upvotes: newUpvotes, downvotes: newDownvotes, userVote: newUserVote };
+          }
+          return r;
+        }),
+      };
+    });
+
     upvoteMutation.mutate(
       { cityReviewId: review.id },
       {
-        onSuccess: (data) => {
-          console.log("Upvote successful:", data.message);
-        },
         onError: (error) => {
           console.error("Upvote failed:", error.message);
+          // Revert optimistic updates on error
+          queryClient.invalidateQueries({ queryKey: ["cityReview", review.id] });
+          queryClient.invalidateQueries({ queryKey: ["cityReviews"] });
+          queryClient.invalidateQueries({ queryKey: ["allCityReviews"] });
         },
       }
     );
@@ -178,14 +234,70 @@ export default function CityReviewPage() {
 
   const handleDownvote = () => {
     if (!review) return;
+    
+    // Optimistic update for the single review cache
+    queryClient.setQueryData(["cityReview", review.id], (old: { data: CityReview } | undefined) => {
+      if (!old) return old;
+      const currentVote = old.data.userVote;
+      const newUpvotes = currentVote === 'UPVOTE' ? old.data.upvotes - 1 : old.data.upvotes;
+      const newDownvotes = currentVote === 'DOWNVOTE' ? old.data.downvotes - 1 : old.data.downvotes + 1;
+      const newUserVote = currentVote === 'DOWNVOTE' ? null : 'DOWNVOTE';
+      
+      return {
+        ...old,
+        data: { 
+          ...old.data, 
+          upvotes: newUpvotes,
+          downvotes: newDownvotes,
+          userVote: newUserVote
+        },
+      };
+    });
+
+    // Optimistic update for list caches
+    queryClient.setQueryData(["cityReviews", { cityId: review.cityId }], (old: { data: CityReview[] } | undefined) => {
+      if (!old) return old;
+      return {
+        ...old,
+        data: old.data.map((r) => {
+          if (r.id === review.id) {
+            const currentVote = r.userVote;
+            const newUpvotes = currentVote === 'UPVOTE' ? r.upvotes - 1 : r.upvotes;
+            const newDownvotes = currentVote === 'DOWNVOTE' ? r.downvotes - 1 : r.downvotes + 1;
+            const newUserVote = currentVote === 'DOWNVOTE' ? null : 'DOWNVOTE';
+            return { ...r, upvotes: newUpvotes, downvotes: newDownvotes, userVote: newUserVote };
+          }
+          return r;
+        }),
+      };
+    });
+
+    queryClient.setQueryData(["allCityReviews"], (old: { data: CityReview[] } | undefined) => {
+      if (!old) return old;
+      return {
+        ...old,
+        data: old.data.map((r) => {
+          if (r.id === review.id) {
+            const currentVote = r.userVote;
+            const newUpvotes = currentVote === 'UPVOTE' ? r.upvotes - 1 : r.upvotes;
+            const newDownvotes = currentVote === 'DOWNVOTE' ? r.downvotes - 1 : r.downvotes + 1;
+            const newUserVote = currentVote === 'DOWNVOTE' ? null : 'DOWNVOTE';
+            return { ...r, upvotes: newUpvotes, downvotes: newDownvotes, userVote: newUserVote };
+          }
+          return r;
+        }),
+      };
+    });
+
     downvoteMutation.mutate(
       { cityReviewId: review.id },
       {
-        onSuccess: (data) => {
-          console.log("Downvote successful:", data.message);
-        },
         onError: (error) => {
           console.error("Downvote failed:", error.message);
+          // Revert optimistic updates on error
+          queryClient.invalidateQueries({ queryKey: ["cityReview", review.id] });
+          queryClient.invalidateQueries({ queryKey: ["cityReviews"] });
+          queryClient.invalidateQueries({ queryKey: ["allCityReviews"] });
         },
       }
     );
@@ -401,9 +513,9 @@ export default function CityReviewPage() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="space-y-4 sm:space-y-6">
           {/* Review Content */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Review Header */}
             <Card className="bg-white rounded-xl sm:rounded-2xl shadow-lg border-0">
               <CardContent className="p-4 sm:p-6">
@@ -484,10 +596,72 @@ export default function CityReviewPage() {
                         )}
                       </div>
                     </div>
+                    
+                    {/* Voting Section */}
+                    <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant={review?.userVote === 'UPVOTE' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={handleUpvote}
+                          disabled={upvoteMutation.isPending || downvoteMutation.isPending}
+                          className="text-xs sm:text-sm"
+                        >
+                          {upvoteMutation.isPending ? (
+                            <>
+                              <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-1 sm:mr-2" />
+                              Voting...
+                            </>
+                          ) : (
+                            <>
+                              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+                              Upvote ({review?.upvotes || 0})
+                            </>
+                          )}
+                        </Button>
+                        
+                        <Button
+                          variant={review?.userVote === 'DOWNVOTE' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={handleDownvote}
+                          disabled={upvoteMutation.isPending || downvoteMutation.isPending}
+                          className="text-xs sm:text-sm"
+                        >
+                          {downvoteMutation.isPending ? (
+                            <>
+                              <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-1 sm:mr-2" />
+                              Voting...
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+                              Downvote ({review?.downvotes || 0})
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Detailed Review */}
+            {review?.note && (
+              <Card className="bg-white rounded-xl sm:rounded-2xl shadow-lg border-0">
+                <CardHeader>
+                  <CardTitle className="text-lg sm:text-xl flex items-center">
+                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-500" />
+                    Detailed Review
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-6">
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {review.note}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Overall Rating */}
             <Card className="bg-white rounded-xl sm:rounded-2xl shadow-lg border-0">
@@ -604,22 +778,7 @@ export default function CityReviewPage() {
               </Card>
             )}
 
-            {/* Review Note */}
-            {review?.note && (
-              <Card className="bg-white rounded-xl sm:rounded-2xl shadow-lg border-0">
-                <CardHeader>
-                  <CardTitle className="text-lg sm:text-xl flex items-center">
-                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-500" />
-                    Additional Notes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 sm:p-6">
-                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {review.note}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+
 
             {/* Comments Section */}
             <Card className="bg-white rounded-xl sm:rounded-2xl shadow-lg border-0">
@@ -682,74 +841,6 @@ export default function CityReviewPage() {
                     ))
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-4 sm:space-y-6">
-            {/* Voting */}
-            <Card className="bg-white rounded-xl sm:rounded-2xl shadow-lg border-0 sticky top-4">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex flex-row lg:flex-col items-center gap-3 lg:gap-4">
-                  <Button
-                    variant={review?.userVote === 'UPVOTE' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={handleUpvote}
-                    className="flex-1 lg:w-full text-xs sm:text-sm"
-                  >
-                    <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 mr-1 lg:mr-2" />
-                    Upvote ({review?.upvotes || 0})
-                  </Button>
-                  
-                  <Button
-                    variant={review?.userVote === 'DOWNVOTE' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={handleDownvote}
-                    className="flex-1 lg:w-full text-xs sm:text-sm"
-                  >
-                    <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 mr-1 lg:mr-2" />
-                    Downvote ({review?.downvotes || 0})
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* City Info */}
-            <Card className="bg-white rounded-xl sm:rounded-2xl shadow-lg border-0">
-              <CardHeader>
-                <CardTitle className="text-base sm:text-lg">About {review?.city?.name}</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6">
-                <div className="space-y-2 sm:space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
-                    <span className="text-xs sm:text-sm text-gray-600">Country:</span>
-                    <span className="text-xs sm:text-sm font-medium">{review?.city?.country}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
-                    <span className="text-xs sm:text-sm text-gray-600">Overall Rating:</span>
-                    <span className="text-xs sm:text-sm font-medium text-orange-500">
-                      {overallRating}/5
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* More Reviews */}
-            <Card className="bg-white rounded-xl sm:rounded-2xl shadow-lg border-0">
-              <CardHeader>
-                <CardTitle className="text-base sm:text-lg">More Reviews</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6">
-                <Link href="/cities">
-                  <Button variant="outline" className="w-full text-xs sm:text-sm">
-                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    Browse All Cities
-                  </Button>
-                </Link>
               </CardContent>
             </Card>
           </div>

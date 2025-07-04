@@ -4,47 +4,19 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowDown, ArrowUp, Bookmark, Filter, Hash, MapPin, MessageSquare, Share2, Star, TrendingUp, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Bookmark, Filter, Hash, MessageSquare, Share2, TrendingUp, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
 import { usePosts, useUpvotePost, useDownvotePost, useRemoveVote, useSavePost, useUnsavePost, usePostCountries } from '@/hooks/usePosts';
-import { useAllCityReviews, useUpvoteCityReview, useDownvoteCityReview, useRemoveCityReviewVote, useReviewCountries } from '@/hooks/useCityReviews';
 import { useCountries } from '@/hooks/useCountries';
-import { Post, CityReview } from '@/lib/types';
+import { Post } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 
-type ReviewPost = Omit<CityReview, 'id' | 'title'> & {
-  id: string;
-  type: 'review';
-  category: 'REVIEW';
-  tags: string[];
-  commentsCount: number;
-  content: string;
-  _count: { comments: number };
-  title: string;
-};
-
-type CombinedPost = Post | ReviewPost;
+type CombinedPost = Post;
 
 // Type guard for regular posts
 const isRegularPost = (post: CombinedPost): post is Post => {
-  return !post.id.startsWith('review-');
-};
-
-const getAverageRating = (review: CityReview | undefined): number | null => {
-  if (!review) return null;
-  return (
-    review.jobOpportunities +
-    review.costOfLiving +
-    review.safety +
-    review.transport +
-    review.community +
-    review.healthcare +
-    review.education +
-    review.nightlife +
-    review.weather +
-    review.internet
-  ) / 10;
+  return true;
 };
 
 // Category color mapping
@@ -89,12 +61,10 @@ export default function HomePage() {
     country: selectedCountry && selectedCountry !== 'all' ? selectedCountry : undefined,
     tags: selectedTags.length > 0 ? selectedTags : undefined
   });
-  const { data: cityReviewsData, isLoading: reviewsLoading } = useAllCityReviews({ limit: 50 });
   const { data: countries = [] } = useCountries();
   
   // Get country data with counts from backend
   const { data: postCountries = [] } = usePostCountries();
-  const { data: reviewCountries = [] } = useReviewCountries();
   
   const upvotePost = useUpvotePost();
   const downvotePost = useDownvotePost();
@@ -102,17 +72,9 @@ export default function HomePage() {
   const savePost = useSavePost();
   const unsavePost = useUnsavePost();
 
-  // Review voting hooks
-  const upvoteReview = useUpvoteCityReview();
-  const downvoteReview = useDownvoteCityReview();
-  const removeVoteReview = useRemoveCityReviewVote();
-
-  const isLoading = postsLoading || reviewsLoading;
+  const isLoading = postsLoading;
   const isSearching = searchTerm !== debouncedSearchTerm;
 
-  // Convert city reviews to post-like format for unified display
-  const cityReviews = cityReviewsData?.data || [];
-  
   const trimmedSearch = debouncedSearchTerm.trim().toLowerCase();
 
   // Filter posts based on debounced search term (title only)
@@ -121,26 +83,8 @@ export default function HomePage() {
     return post.title.toLowerCase().includes(trimmedSearch);
   });
 
-  // Filter city reviews based on search term
-  const filteredCityReviews = cityReviews.filter(review => {
-    if (!trimmedSearch) return true;
-    return review.title?.toLowerCase().includes(trimmedSearch);
-  });
-  
-  const reviewPosts: ReviewPost[] = filteredCityReviews.map(review => ({
-    ...review,
-    id: `review-${review.id}`,
-    title: review.title || `Life in ${review.city.name}: My perspective`,
-    content: review.note || `Rating: ${getAverageRating(review)}/5`,
-    category: 'REVIEW',
-    type: 'review',
-    tags: ['review'],
-    commentsCount: 0,
-    _count: { comments: 0 }
-  }));
-
-  // Combine and sort all content
-  const allContent: CombinedPost[] = [...filteredPosts, ...reviewPosts];
+  // Use filtered posts as all content
+  const allContent: CombinedPost[] = filteredPosts;
 
   // Apply sorting
   const sortedContent = allContent.sort((a, b) => {
@@ -165,28 +109,6 @@ export default function HomePage() {
   const hasMore = sortedContent.length > displayCount;
 
   const handleVote = (postId: string, voteType: 'UPVOTE' | 'DOWNVOTE') => {
-    // Handle voting for review posts
-    if (postId.startsWith('review-')) {
-      const reviewId = postId.replace('review-', '');
-      const targetReview = cityReviews.find(r => r.id === reviewId);
-      if (!targetReview) return;
-
-      if (voteType === 'UPVOTE') {
-        if (targetReview.userVote === 'UPVOTE') {
-          removeVoteReview.mutate({ cityReviewId: reviewId });
-        } else {
-          upvoteReview.mutate({ cityReviewId: reviewId });
-        }
-      } else {
-        if (targetReview.userVote === 'DOWNVOTE') {
-          removeVoteReview.mutate({ cityReviewId: reviewId });
-        } else {
-          downvoteReview.mutate({ cityReviewId: reviewId });
-        }
-      }
-      return;
-    }
-    
     const targetPost = posts.find(p => p.id === postId);
     if (!targetPost) return;
 
@@ -227,7 +149,7 @@ export default function HomePage() {
     setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
   };
 
-  // Combine country data from posts and reviews with counts
+  // Combine country data from posts with counts
   const combinedCountries = useMemo(() => {
     const countryMap = new Map<string, { name: string; flag: string; count: number }>();
     
@@ -243,26 +165,13 @@ export default function HomePage() {
       }
     });
     
-    // Add countries from reviews
-    reviewCountries.forEach(({ country, count }) => {
-      const countryInfo = countries.find(c => c.code === country || c.name === country);
-      if (countryInfo) {
-        const existing = countryMap.get(country);
-        countryMap.set(country, {
-          name: countryInfo.name,
-          flag: countryInfo.flag,
-          count: (existing?.count || 0) + count
-        });
-      }
-    });
-    
     return Array.from(countryMap.entries()).map(([code, data]) => ({
       code,
       name: data.name,
       flag: data.flag,
       count: data.count
     })).sort((a, b) => b.count - a.count);
-  }, [postCountries, reviewCountries, countries]);
+  }, [postCountries, countries]);
 
   // Filter countries by search
   const filteredCountries = combinedCountries.filter(
@@ -500,7 +409,7 @@ export default function HomePage() {
                           {/* Header */}
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 mb-2 sm:mb-3">
                             <div className="flex-1 min-w-0">
-                              <Link href={isRegularPost(post) ? `/posts/${post.id}` : `/cities/reviews/${post.id.replace('review-', '')}`}>
+                              <Link href={`/posts/${post.id}`}>
                                 <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 hover:text-orange-600 transition-colors line-clamp-2">
                                   {post.title}
                                 </h3>
@@ -523,33 +432,9 @@ export default function HomePage() {
 
                           {/* Content Preview */}
                           <div className="mb-3 sm:mb-4">
-                            {post.type === 'review' ? (
-                              <div className="space-y-2 sm:space-y-3">
-                                <div className="flex items-center gap-2 sm:gap-3">
-                                  <div className="flex items-center gap-1 sm:gap-2">
-                                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
-                                    <span className="text-sm sm:text-base font-medium text-gray-900">
-                                      {(post as ReviewPost).city.name}, {(post as ReviewPost).city.country}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 fill-current" />
-                                    <span className="text-sm sm:text-base font-medium text-gray-900">
-                                      {getAverageRating(post as ReviewPost)?.toFixed(1) || 'N/A'}
-                                    </span>
-                                  </div>
-                                </div>
-                                {post.content && (
-                                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
-                                    {post.content}
-                                  </p>
-                                )}
-                              </div>
-                            ) : (
-                              <p className="text-xs sm:text-sm text-gray-600 line-clamp-3">
-                                {post.content}
-                              </p>
-                            )}
+                            <p className="text-xs sm:text-sm text-gray-600 line-clamp-3">
+                              {post.content}
+                            </p>
                           </div>
 
                           {/* Tags */}
@@ -570,31 +455,27 @@ export default function HomePage() {
 
                           {/* Action Buttons */}
                           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-                            <Link href={isRegularPost(post) ? `/posts/${post.id}` : `/cities/reviews/${post.id.replace('review-', '')}`}>
+                            <Link href={`/posts/${post.id}`}>
                               <Button variant="ghost" size="sm" className="h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm text-gray-600">
                                 <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                                 {post.commentsCount || 0} {(post.commentsCount || 0) === 1 ? 'comment' : 'comments'}
                               </Button>
                             </Link>
-                            {isRegularPost(post) && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleSave(post.id)}
-                                  className={`h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm ${
-                                    post.isSaved ? 'text-orange-600' : 'text-gray-600'
-                                  }`}
-                                >
-                                  <Bookmark className={`w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 ${post.isSaved ? 'fill-current' : ''}`} />
-                                  {post.isSaved ? 'Saved' : 'Save'}
-                                </Button>
-                                <Button variant="ghost" size="sm" className="h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm text-gray-600">
-                                  <Share2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                                  Share
-                                </Button>
-                              </>
-                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleSave(post.id)}
+                              className={`h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm ${
+                                post.isSaved ? 'text-orange-600' : 'text-gray-600'
+                              }`}
+                            >
+                              <Bookmark className={`w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 ${post.isSaved ? 'fill-current' : ''}`} />
+                              {post.isSaved ? 'Saved' : 'Save'}
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm text-gray-600">
+                              <Share2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                              Share
+                            </Button>
                           </div>
                         </div>
                       </div>
