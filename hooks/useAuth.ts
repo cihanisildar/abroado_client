@@ -29,19 +29,51 @@ export const useAuth = () => {
 
   const login = useMutation<LoginResponse, Error, LoginRequest>({
     mutationFn: async (credentials) => {
-      const response = await api.post('/auth/login', credentials);
-      return response.data;
+      try {
+        const response = await api.post('/auth/login', credentials);
+        const data = response.data;
+        // Check if the response indicates failure
+        if (!data.success) {
+          return Promise.reject(data);
+        }
+        return data;
+      } catch (error: any) {
+        // Handle Axios errors (401, 403, etc.) that still have response data
+        if (error.response?.data) {
+          return Promise.reject(error.response.data);
+        }
+        // Re-throw other errors as-is
+        throw error;
+      }
     },
     onSuccess: (data) => {
       // Set user data in React Query cache - token is in httpOnly cookie
       queryClient.setQueryData(['auth', 'user'], data.data.user);
     },
+    onError: () => {},
   });
 
   const register = useMutation<RegisterResponse, Error, RegisterRequest>({
     mutationFn: async (userData) => {
-      const response = await api.post('/auth/register', userData);
-      return response.data;
+      try {
+        const response = await api.post('/auth/register', userData);
+        const data = response.data;
+        
+        // Check if the response indicates failure
+        if (!data.success) {
+          throw new Error(JSON.stringify(data));
+        }
+        
+        return data;
+      } catch (error: any) {
+        // Handle Axios errors (400, 401, etc.) that still have response data
+        if (error.response?.data) {
+          throw new Error(JSON.stringify(error.response.data));
+        }
+        
+        // Re-throw other errors as-is
+        throw error;
+      }
     },
     onSuccess: (data) => {
       // Backend handles auto-login, so set user data in cache

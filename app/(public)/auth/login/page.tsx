@@ -1,221 +1,198 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@/hooks/useAuth';
-import toast from 'react-hot-toast';
-import { ErrorResponse } from '@/lib/types';
-import { ApiErrorResponse } from '@/utils/responses';
+import type React from "react"
 
-// Define axios error response type
-interface AxiosErrorResponse {
-  response?: {
-    data?: ApiErrorResponse;
-  };
+import { useState } from "react"
+import Link from "next/link"
+import { Eye, EyeOff, Globe, MapPin, Home, Users, MessageCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
+interface LoginFormData {
+  email: string
+  password: string
 }
 
 export default function LoginPage() {
-  const { login } = useAuth();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: "",
+    password: "",
+  })
+
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleInputChange = (field: keyof LoginFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Show loading toast
-    const loadingToast = toast.loading('Signing you in...');
-    
-    try {
-      const result = await login.mutateAsync(formData);
-      toast.dismiss(loadingToast);
-      
-      if (result.success) {
-        toast.success('Welcome back! Redirecting...');
-        // Use window.location for a full page reload to ensure proper auth state
-        window.location.href = '/';
-      }
-    } catch (error) {
-      toast.dismiss(loadingToast);
-      
-      // Type guard to check if error matches our ErrorResponse interface
-      const isErrorResponse = (err: unknown): err is ErrorResponse => {
-        return typeof err === 'object' && err !== null && 'message' in err;
-      };
-      
-      // Type guard for axios error response
-      const isAxiosErrorResponse = (err: unknown): err is AxiosErrorResponse => {
-        return typeof err === 'object' && err !== null && 'response' in err;
-      };
-      
-      // Handle API error responses
-      if (isAxiosErrorResponse(error) && error.response?.data) {
-        toast.error(error.response.data.message);
-      } else if (isErrorResponse(error)) {
-        toast.error(error.message);
-      } else {
-        toast.error('Login failed. Please check your credentials and try again.');
-      }
-      
-      console.error('Login failed:', error);
-    }
-  };
+    e.preventDefault()
+    setIsLoading(true)
+
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false)
+      console.log("Login data:", formData)
+    }, 2000)
+  }
 
   return (
-    <div className="min-h-screen flex bg-white">
-      {/* Left Side - Login Form */}
-      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24">
-        <div className="mx-auto w-full max-w-sm lg:max-w-md">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">Welcome back to</h1>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
-              Gurbetlik
-            </h2>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100/30">
+      <div className="container mx-auto px-4 py-8 lg:py-12">
+        <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
+          {/* Left Side - Login Form */}
+          <div className="w-full max-w-lg mx-auto lg:mx-0">
+            <Card className="border-0 shadow-2xl shadow-orange-200/20 bg-white">
+              <CardHeader className="text-center pb-8 pt-10">
+                <div className="w-16 h-16 bg-orange-100 rounded-3xl mx-auto mb-6 flex items-center justify-center">
+                  <Globe className="w-8 h-8 text-orange-500" />
+                </div>
+                <CardTitle className="text-3xl font-semibold text-gray-900 mb-2">Welcome back</CardTitle>
+                <CardDescription className="text-gray-600 text-lg">Sign in to your Abroado account</CardDescription>
+              </CardHeader>
 
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Sign in to your account</h3>
-              <p className="text-gray-600">Continue your journey with the expat community</p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="Enter your email"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="Enter your password"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={login.isPending}
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-              >
-                {login.isPending ? (
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Signing in...</span>
+              <CardContent className="px-10 pb-10">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Email */}
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                      Email
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      className="h-12 border-gray-200 focus:border-orange-400 focus:ring-orange-400/20 rounded-xl"
+                      required
+                    />
                   </div>
-                ) : (
-                  'Sign in'
-                )}
-              </button>
-            </form>
 
-            <div className="text-center">
-              <p className="text-gray-600">
-                Don&apos;t have an account?{' '}
-                <Link href="/auth/register" className="text-orange-600 hover:text-orange-700 font-semibold">
-                  Sign up
-                </Link>
-              </p>
-            </div>
+                  {/* Password */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                        Password
+                      </Label>
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm text-orange-600 hover:text-orange-700 transition-colors"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={formData.password}
+                        onChange={(e) => handleInputChange("password", e.target.value)}
+                        className="h-12 pr-12 border-gray-200 focus:border-orange-400 focus:ring-orange-400/20 rounded-xl"
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-12 px-4 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5 text-gray-400" />
+                        ) : (
+                          <Eye className="w-5 h-5 text-gray-400" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-200"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Signing in...
+                      </div>
+                    ) : (
+                      "Sign in"
+                    )}
+                  </Button>
+                </form>
+
+                <div className="text-center pt-8 mt-8 border-t border-gray-100">
+                  <p className="text-gray-600">
+                    Don't have an account?{" "}
+                    <Link
+                      href="/auth/register"
+                      className="font-medium text-orange-600 hover:text-orange-700 transition-colors"
+                    >
+                      Sign up
+                    </Link>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
-      </div>
 
-      {/* Right Side - App Benefits */}
-      <div className="hidden lg:flex lg:flex-1 bg-gradient-to-br from-orange-50 to-orange-100 relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-100/50 to-orange-200/30"></div>
-        <div className="absolute top-20 right-20 w-64 h-64 bg-orange-200/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 left-20 w-48 h-48 bg-orange-300/20 rounded-full blur-2xl"></div>
-        
-        <div className="relative z-10 flex flex-col justify-center px-12 xl:px-16">
-          <div className="max-w-md">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              Connect with the global expat community
-            </h2>
-            <p className="text-lg text-gray-700 mb-8">
-              Join thousands of people sharing their experiences of living, working, and studying abroad.
-            </p>
-            
-            <div className="space-y-6">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                  <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Discover Cities</h3>
-                  <p className="text-gray-600">Read authentic reviews from people who&apos;ve lived there</p>
-                </div>
+          {/* Right Side - Benefits */}
+          <div className="hidden lg:block">
+            <div className="space-y-10">
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">Connect with expats worldwide</h1>
+                <p className="text-xl text-gray-600 leading-relaxed">
+                  Join thousands of people sharing their experiences of living, working, and studying abroad.
+                </p>
               </div>
 
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                  <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Find Accommodation</h3>
-                  <p className="text-gray-600">Connect with roommates and find perfect housing</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                  <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Build Your Network</h3>
-                  <p className="text-gray-600">Connect with fellow expats and local communities</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                  <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Share Experiences</h3>
-                  <p className="text-gray-600">Help others with your insights and learn from theirs</p>
-                </div>
+              <div className="space-y-6">
+                {[
+                  {
+                    icon: <MapPin className="w-6 h-6 text-orange-500" />,
+                    title: "Discover Cities",
+                    description: "Read authentic reviews from people who've lived there",
+                  },
+                  {
+                    icon: <Home className="w-6 h-6 text-orange-500" />,
+                    title: "Find Accommodation",
+                    description: "Connect with roommates and find perfect housing",
+                  },
+                  {
+                    icon: <Users className="w-6 h-6 text-orange-500" />,
+                    title: "Build Your Network",
+                    description: "Connect with fellow expats and local communities",
+                  },
+                  {
+                    icon: <MessageCircle className="w-6 h-6 text-orange-500" />,
+                    title: "Share Experiences",
+                    description: "Help others with your insights and learn from theirs",
+                  },
+                ].map((feature, index) => (
+                  <div
+                    key={index}
+                    className="flex gap-5 p-6 rounded-2xl bg-white/70 backdrop-blur-sm border border-orange-100/50 shadow-sm"
+                  >
+                    <div className="flex-shrink-0 w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center">
+                      {feature.icon}
+                    </div>
+                    <div className="pt-1">
+                      <h3 className="font-semibold text-gray-900 mb-2 text-lg">{feature.title}</h3>
+                      <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
-} 
+  )
+}

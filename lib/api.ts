@@ -1,3 +1,4 @@
+// api.ts
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { AuthResponse } from './types';
 
@@ -43,8 +44,13 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
+    // Don't intercept auth endpoints (login, register, refresh)
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/login') || 
+                          originalRequest.url?.includes('/auth/register') || 
+                          originalRequest.url?.includes('/auth/refresh');
+
     // Handle both 401 (Unauthorized) and 403 (Forbidden) for auth errors
-    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
+    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         // If already refreshing, queue this request
         return new Promise((resolve, reject) => {
