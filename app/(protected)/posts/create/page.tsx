@@ -121,6 +121,11 @@ export default function CreatePostPage() {
 
       console.log('Form state before sending:', newPost);
       console.log('Sending payload:', postData);
+      console.log('CityId type and value:', { 
+        cityId: newPost.cityId, 
+        type: typeof newPost.cityId,
+        selectedCity: cities.find(c => c.id === newPost.cityId)
+      });
       
       const result = await createPostMutation.mutateAsync(postData);
       

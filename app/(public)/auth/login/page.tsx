@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAuth } from "@/hooks/useAuth"
+import toast from "react-hot-toast"
+import { useRouter } from "next/navigation"
 
 interface LoginFormData {
   email: string
@@ -22,7 +25,8 @@ export default function LoginPage() {
   })
 
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const { login } = useAuth()
+  const router = useRouter()
 
   const handleInputChange = (field: keyof LoginFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -30,13 +34,34 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      console.log("Login data:", formData)
-    }, 2000)
+    
+    const loadingToast = toast.loading('Signing in...')
+    
+    try {
+      await login.mutateAsync(formData)
+      toast.dismiss(loadingToast)
+      toast.success('Welcome back! 🎉')
+      router.push('/')
+    } catch (error: any) {
+      toast.dismiss(loadingToast)
+      
+      // Handle different error formats
+      let errorMessage = 'Login failed. Please try again.'
+      
+      // The error object from useAuth is already a JavaScript object, not JSON string
+      if (error.error) {
+        // Use the specific error message from the API
+        errorMessage = error.error
+      } else if (error.message) {
+        // Fallback to the general message
+        errorMessage = error.message
+      } else if (error.response?.data?.message) {
+        // Handle axios error responses
+        errorMessage = error.response.data.message
+      }
+      
+      toast.error(errorMessage)
+    }
   }
 
   return (
@@ -114,9 +139,9 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-200"
-                    disabled={isLoading}
+                    disabled={login.isPending}
                   >
-                    {isLoading ? (
+                    {login.isPending ? (
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         Signing in...
@@ -128,8 +153,7 @@ export default function LoginPage() {
                 </form>
 
                 <div className="text-center pt-8 mt-8 border-t border-gray-100">
-                  <p className="text-gray-600">
-                    Don't have an account?{" "}
+                  <p className="text-gray-600">Don&apos;t have an account?{" "}
                     <Link
                       href="/auth/register"
                       className="font-medium text-orange-600 hover:text-orange-700 transition-colors"

@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAuth } from "@/hooks/useAuth"
+import toast from "react-hot-toast"
+import { useRouter } from "next/navigation"
 
 interface RegisterFormData {
   email: string
@@ -28,10 +31,10 @@ export default function RegisterPage() {
   })
 
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterFormData, string>>>({})
-  const [touched, setTouched] = useState<Partial<Record<keyof RegisterFormData, boolean>>>({})
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const { register } = useAuth()
+  const router = useRouter()
 
   // Password validation helpers
   const passwordChecks = {
@@ -52,13 +55,51 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      console.log("Registration data:", formData)
-    }, 2000)
+    
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+    
+    // Validate password requirements
+    if (!passwordChecks.length || !passwordChecks.uppercase || !passwordChecks.lowercase || !passwordChecks.number) {
+      toast.error('Please meet all password requirements')
+      return
+    }
+    
+    const loadingToast = toast.loading('Creating your account...')
+    
+    try {
+      await register.mutateAsync({
+        email: formData.email,
+        username: formData.username,
+        password: formData.password,
+        role: formData.role
+      })
+      toast.dismiss(loadingToast)
+      toast.success('Account created successfully! Welcome to Abroado! 🎉')
+      router.push('/')
+    } catch (error: any) {
+      toast.dismiss(loadingToast)
+      
+      // Handle different error formats
+      let errorMessage = 'Registration failed. Please try again.'
+      
+      // The error object from useAuth is already a JavaScript object, not JSON string
+      if (error.error) {
+        // Use the specific error message from the API
+        errorMessage = error.error
+      } else if (error.message) {
+        // Fallback to the general message
+        errorMessage = error.message
+      } else if (error.response?.data?.message) {
+        // Handle axios error responses
+        errorMessage = error.response.data.message
+      }
+      
+      toast.error(errorMessage)
+    }
   }
 
   return (
@@ -91,6 +132,7 @@ export default function RegisterPage() {
                         value={formData.username}
                         onChange={(e) => handleInputChange("username", e.target.value)}
                         className="h-12 border-gray-200 focus:border-orange-400 focus:ring-orange-400/20 rounded-xl"
+                        required
                       />
                     </div>
 
@@ -105,6 +147,7 @@ export default function RegisterPage() {
                         value={formData.email}
                         onChange={(e) => handleInputChange("email", e.target.value)}
                         className="h-12 border-gray-200 focus:border-orange-400 focus:ring-orange-400/20 rounded-xl"
+                        required
                       />
                     </div>
                   </div>
@@ -122,6 +165,7 @@ export default function RegisterPage() {
                         value={formData.password}
                         onChange={(e) => handleInputChange("password", e.target.value)}
                         className="h-12 pr-12 border-gray-200 focus:border-orange-400 focus:ring-orange-400/20 rounded-xl"
+                        required
                       />
                       <Button
                         type="button"
@@ -180,6 +224,7 @@ export default function RegisterPage() {
                         value={formData.confirmPassword}
                         onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                         className="h-12 pr-12 border-gray-200 focus:border-orange-400 focus:ring-orange-400/20 rounded-xl"
+                        required
                       />
                       <Button
                         type="button"
@@ -286,9 +331,9 @@ export default function RegisterPage() {
                   <Button
                     type="submit"
                     className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-200"
-                    disabled={isLoading}
+                    disabled={register.isPending}
                   >
-                    {isLoading ? (
+                    {register.isPending ? (
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         Creating account...

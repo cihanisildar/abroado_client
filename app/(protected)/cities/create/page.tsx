@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 // UI Components
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 
 // Icons
@@ -76,24 +78,13 @@ export default function CreateCityReviewPage() {
   const [prosInput, setProsInput] = useState('');
   const [consInput, setConsInput] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [countrySearch, setCountrySearch] = useState('');
-  const [citySearch, setCitySearch] = useState('');
 
   // Get cities for selected country
   const { 
     data: citiesResponse
-  } = useCities(form.country, {
-    search: citySearch
-  });
+  } = useCities(form.country);
 
   const cities = citiesResponse?.data || [];
-
-  const filteredCountries = countries.filter(
-    (country) =>
-      country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
-      country.code.toLowerCase().includes(countrySearch.toLowerCase())
-  );
 
   // Fetch reviews for the selected city
   const {
@@ -116,20 +107,19 @@ export default function CreateCityReviewPage() {
     // Reset city when country changes
     setForm(prev => ({
       ...prev,
-      country: value,
+      country: value === 'none' ? '' : value,
       cityId: '',
       cityName: ''
     }));
     
-    // Reset city search when country changes
-    setCitySearch('');
+    // Reset city when country changes
   };
 
   const handleCityChange = (value: string) => {
     const selectedCity = cities.find(city => city.id === value);
     setForm(prev => ({
       ...prev,
-      cityId: value,
+      cityId: value === 'none' ? '' : value,
       cityName: selectedCity?.name || ''
     }));
   };
@@ -173,7 +163,6 @@ export default function CreateCityReviewPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
 
     // Frontend validation for title and note length
     if (form.title.length > TITLE_MAX_LENGTH) {
@@ -185,11 +174,16 @@ export default function CreateCityReviewPage() {
       return;
     }
 
+    const loadingToast = toast.loading('Creating review...');
+
     try {
       await createReview.mutateAsync(form);
-      setSuccess('Review created successfully!');
+      toast.dismiss(loadingToast);
+      toast.success('Review created successfully! 🎉');
       setTimeout(() => router.push('/cities'), 1200);
-    } catch {
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error('Failed to create review. Please try again.');
       setError('Failed to create review.');
     }
   };
@@ -247,88 +241,61 @@ export default function CreateCityReviewPage() {
                     <Label className="text-sm font-medium text-gray-700">
                       Country *
                     </Label>
-                    <div className="mt-1">
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={countrySearch}
-                          onChange={(e) => setCountrySearch(e.target.value)}
-                          placeholder="Search for a country..."
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        />
-                        {countrySearch && filteredCountries.length > 0 && (
-                          <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
-                            {filteredCountries.slice(0, 5).map((country) => (
-                              <button
-                                key={country.code}
-                                type="button"
-                                onClick={() => {
-                                  handleCountryChange(country.name);
-                                  setCountrySearch('');
-                                }}
-                                className="w-full px-3 sm:px-4 py-2 text-left hover:bg-gray-50 text-sm sm:text-base"
-                              >
-                                {country.name}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      {form.country && (
-                        <div className="mt-2">
-                          <Badge variant="outline" className="text-xs sm:text-sm">
-                            Selected: {form.country}
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
+                    <Select
+                      value={form.country || 'none'}
+                      onValueChange={handleCountryChange}
+                    >
+                      <SelectTrigger className="mt-1 h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        <SelectValue placeholder="Select a country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem key="none" value="none">Select a country</SelectItem>
+                        {countries
+                          .filter((c) => c.name)
+                          .map((country, idx) => (
+                            <SelectItem 
+                              key={`country-${country.name}-${idx}`}
+                              value={country.name}
+                            >
+                              {country.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div>
                     <Label className="text-sm font-medium text-gray-700">
                       City *
                     </Label>
-                    <div className="mt-1">
-                      {form.country ? (
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={citySearch}
-                            onChange={(e) => setCitySearch(e.target.value)}
-                            placeholder="Search for a city..."
-                            className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                          />
-                          {citySearch && cities.length > 0 && (
-                            <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
-                              {cities.slice(0, 5).map((city) => (
-                                <button
-                                  key={city.id}
-                                  type="button"
-                                  onClick={() => {
-                                    handleCityChange(city.id);
-                                    setCitySearch('');
-                                  }}
-                                  className="w-full px-3 sm:px-4 py-2 text-left hover:bg-gray-50 text-sm sm:text-base"
-                                >
-                                  {city.name}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-xs sm:text-sm text-gray-500 p-3 sm:p-4 border border-gray-200 rounded-lg bg-gray-50">
-                          Please select a country first
-                        </div>
-                      )}
-                      {form.cityName && (
-                        <div className="mt-2">
-                          <Badge variant="outline" className="text-xs sm:text-sm">
-                            Selected: {form.cityName}
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
+                    <Select
+                      value={form.cityId || 'none'}
+                      onValueChange={handleCityChange}
+                      disabled={!form.country}
+                    >
+                      <SelectTrigger className="mt-1 h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        <SelectValue placeholder={
+                          !form.country 
+                            ? 'Select a country first' 
+                            : cities.length === 0 
+                              ? 'No cities found' 
+                              : 'Select a city'
+                        } />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem key="none" value="none">Select a city</SelectItem>
+                        {cities.map((city) => (
+                          <SelectItem key={`city-${city.id}`} value={city.id}>
+                            {city.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {form.country && cities.length === 0 && (
+                      <p className="mt-2 text-sm text-yellow-600">
+                        No cities found for this country. Please try a different country.
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -590,12 +557,6 @@ export default function CreateCityReviewPage() {
                   {error && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
                       <div className="text-xs sm:text-sm text-red-800">{error}</div>
-                    </div>
-                  )}
-
-                  {success && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
-                      <div className="text-xs sm:text-sm text-green-800">{success}</div>
                     </div>
                   )}
 

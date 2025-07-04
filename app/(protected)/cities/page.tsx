@@ -606,6 +606,78 @@ export default function CitiesPage() {
                                 {review.transport}/5
                               </span>
                             </div>
+                            <div className="grid grid-cols-[110px_1fr_auto] items-center gap-2 sm:gap-3 w-full">
+                              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                                <User className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-500" />
+                                <span className="text-xs sm:text-sm text-gray-600">
+                                  Community
+                                </span>
+                              </div>
+                              <RatingBar rating={review.community || 0} />
+                              <span className="text-xs sm:text-sm font-medium text-gray-900 min-w-[2rem] text-right">
+                                {review.community}/5
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-[110px_1fr_auto] items-center gap-2 sm:gap-3 w-full">
+                              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                                <Shield className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-500" />
+                                <span className="text-xs sm:text-sm text-gray-600">
+                                  Healthcare
+                                </span>
+                              </div>
+                              <RatingBar rating={review.healthcare || 0} />
+                              <span className="text-xs sm:text-sm font-medium text-gray-900 min-w-[2rem] text-right">
+                                {review.healthcare}/5
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-[110px_1fr_auto] items-center gap-2 sm:gap-3 w-full">
+                              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                                <Bookmark className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-500" />
+                                <span className="text-xs sm:text-sm text-gray-600">
+                                  Education
+                                </span>
+                              </div>
+                              <RatingBar rating={review.education || 0} />
+                              <span className="text-xs sm:text-sm font-medium text-gray-900 min-w-[2rem] text-right">
+                                {review.education}/5
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-[110px_1fr_auto] items-center gap-2 sm:gap-3 w-full">
+                              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                                <Star className="w-3 h-3 sm:w-4 sm:h-4 text-pink-500" />
+                                <span className="text-xs sm:text-sm text-gray-600">
+                                  Nightlife
+                                </span>
+                              </div>
+                              <RatingBar rating={review.nightlife || 0} />
+                              <span className="text-xs sm:text-sm font-medium text-gray-900 min-w-[2rem] text-right">
+                                {review.nightlife}/5
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-[110px_1fr_auto] items-center gap-2 sm:gap-3 w-full">
+                              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                                <Globe className="w-3 h-3 sm:w-4 sm:h-4 text-sky-500" />
+                                <span className="text-xs sm:text-sm text-gray-600">
+                                  Weather
+                                </span>
+                              </div>
+                              <RatingBar rating={review.weather || 0} />
+                              <span className="text-xs sm:text-sm font-medium text-gray-900 min-w-[2rem] text-right">
+                                {review.weather}/5
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-[110px_1fr_auto] items-center gap-2 sm:gap-3 w-full">
+                              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-violet-500" />
+                                <span className="text-xs sm:text-sm text-gray-600">
+                                  Internet
+                                </span>
+                              </div>
+                              <RatingBar rating={review.internet || 0} />
+                              <span className="text-xs sm:text-sm font-medium text-gray-900 min-w-[2rem] text-right">
+                                {review.internet}/5
+                              </span>
+                            </div>
                           </div>
 
                           {/* Review Content */}
