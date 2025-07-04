@@ -18,6 +18,10 @@ interface LoginFormData {
   password: string
 }
 
+function isApiError(error: unknown): error is { error?: string; message?: string; response?: { data?: { message?: string } } } {
+  return typeof error === 'object' && error !== null;
+}
+
 export default function LoginPage() {
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
@@ -42,22 +46,24 @@ export default function LoginPage() {
       toast.dismiss(loadingToast)
       toast.success('Welcome back! 🎉')
       router.push('/')
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.dismiss(loadingToast)
       
       // Handle different error formats
       let errorMessage = 'Login failed. Please try again.'
       
-      // The error object from useAuth is already a JavaScript object, not JSON string
-      if (error.error) {
-        // Use the specific error message from the API
-        errorMessage = error.error
-      } else if (error.message) {
-        // Fallback to the general message
-        errorMessage = error.message
-      } else if (error.response?.data?.message) {
-        // Handle axios error responses
-        errorMessage = error.response.data.message
+      if (isApiError(error)) {
+        if (typeof error.error === 'string') {
+          errorMessage = error.error
+        } else if (typeof error.message === 'string') {
+          errorMessage = error.message
+        } else if (
+          error.response &&
+          error.response.data &&
+          typeof error.response.data.message === 'string'
+        ) {
+          errorMessage = error.response.data.message
+        }
       }
       
       toast.error(errorMessage)

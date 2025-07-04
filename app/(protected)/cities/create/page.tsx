@@ -181,7 +181,7 @@ export default function CreateCityReviewPage() {
       toast.dismiss(loadingToast);
       toast.success('Review created successfully! 🎉');
       setTimeout(() => router.push('/cities'), 1200);
-    } catch (error) {
+    } catch {
       toast.dismiss(loadingToast);
       toast.error('Failed to create review. Please try again.');
       setError('Failed to create review.');

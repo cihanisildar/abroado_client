@@ -21,6 +21,10 @@ interface RegisterFormData {
   role: "EXPLORER" | "ABROADER"
 }
 
+function isApiError(error: unknown): error is { error?: string; message?: string; response?: { data?: { message?: string } } } {
+  return typeof error === 'object' && error !== null;
+}
+
 export default function RegisterPage() {
   const [formData, setFormData] = useState<RegisterFormData>({
     email: "",
@@ -80,22 +84,24 @@ export default function RegisterPage() {
       toast.dismiss(loadingToast)
       toast.success('Account created successfully! Welcome to Abroado! 🎉')
       router.push('/')
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.dismiss(loadingToast)
       
       // Handle different error formats
       let errorMessage = 'Registration failed. Please try again.'
       
-      // The error object from useAuth is already a JavaScript object, not JSON string
-      if (error.error) {
-        // Use the specific error message from the API
-        errorMessage = error.error
-      } else if (error.message) {
-        // Fallback to the general message
-        errorMessage = error.message
-      } else if (error.response?.data?.message) {
-        // Handle axios error responses
-        errorMessage = error.response.data.message
+      if (isApiError(error)) {
+        if (typeof error.error === 'string') {
+          errorMessage = error.error
+        } else if (typeof error.message === 'string') {
+          errorMessage = error.message
+        } else if (
+          error.response &&
+          error.response.data &&
+          typeof error.response.data.message === 'string'
+        ) {
+          errorMessage = error.response.data.message
+        }
       }
       
       toast.error(errorMessage)
