@@ -14,11 +14,6 @@ import { useSearchParams } from 'next/navigation';
 
 type CombinedPost = Post;
 
-// Type guard for regular posts
-const isRegularPost = (post: CombinedPost): post is Post => {
-  return true;
-};
-
 // Category color mapping
 const CATEGORY_COLOR_MAP: Record<string, string> = {
   REVIEW: 'bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200',

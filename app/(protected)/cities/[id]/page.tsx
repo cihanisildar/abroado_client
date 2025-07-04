@@ -40,7 +40,6 @@ import {
   Moon,
   Send,
   Shield,
-  Star,
   Trash2,
   TrendingDown,
   TrendingUp,
