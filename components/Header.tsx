@@ -75,8 +75,8 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
             <Image src={logo} alt="logo" width={32} height={32} />
-            <span className="text-xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
-              Gurbetlik
+            <span className="text-xl font-bold text-orange-500 group-hover:text-orange-600 transition-colors">
+              Abroado
             </span>
           </Link>
 

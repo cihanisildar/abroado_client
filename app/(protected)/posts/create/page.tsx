@@ -167,12 +167,12 @@ export default function CreatePostPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-4 mb-6">
-            <Link href="/">
+            {/* <Link href="/">
               <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 hover:bg-orange-50 rounded-xl">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Home
               </Button>
-            </Link>
+            </Link> */}
           </div>
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Create New Post</h1>

@@ -3,7 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "react-hot-toast";
-
+import logo from "@/public/signaling_18391003.png"
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
@@ -11,8 +11,27 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Gurbetci - Connect Abroad Workers & Students",
+  title: "Abroado - Connect Abroad Workers & Students",
   description: "Connect with people living abroad and share experiences",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
+  openGraph: {
+    images: [
+      {
+        url: "/signaling_18391003.png",
+        width: 1200,
+        height: 630,
+        alt: "Abroado - Connect Abroad Workers & Students",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/signaling_18391003.png"],
+  },
 };
 
 export default function RootLayout({

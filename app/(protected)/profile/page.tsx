@@ -353,7 +353,9 @@ export default function ProfilePage() {
             <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
               No saved posts yet
             </h3>
-            <p className="text-gray-600 text-sm sm:text-base">Posts you save will appear here</p>
+            <p className="text-gray-600 text-sm sm:text-base">
+              Posts you save will appear here
+            </p>
           </CardContent>
         </Card>
       );
@@ -398,7 +400,9 @@ export default function ProfilePage() {
                   <div className="flex flex-wrap items-center gap-1 sm:gap-2">
                     {(post.city?.name || post.cityName) && (
                       <span className="inline-flex items-center rounded-full border border-orange-200 text-orange-700 px-2 sm:px-3 text-xs font-semibold gap-1">
-                        <span className="text-pink-500 text-sm sm:text-base">📍</span>
+                        <span className="text-pink-500 text-sm sm:text-base">
+                          📍
+                        </span>
                         {post.city?.name || post.cityName}
                       </span>
                     )}
@@ -414,7 +418,9 @@ export default function ProfilePage() {
                     )}
                   </div>
                   <span className="flex flex-wrap items-center gap-1 text-gray-600 text-xs sm:text-sm">
-                    <span className="mx-1 text-gray-400 hidden sm:inline">•</span>
+                    <span className="mx-1 text-gray-400 hidden sm:inline">
+                      •
+                    </span>
                     Posted by
                     <span className="ml-1 mr-1">
                       <span className="inline-block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gray-200 flex items-center justify-center">
@@ -424,7 +430,9 @@ export default function ProfilePage() {
                     <span className="font-bold text-gray-800">
                       {post.user?.username || user?.username || "You"}
                     </span>
-                    <span className="mx-1 text-gray-400 hidden sm:inline">•</span>
+                    <span className="mx-1 text-gray-400 hidden sm:inline">
+                      •
+                    </span>
                     <span className="text-gray-500">
                       {new Date(post.createdAt).toLocaleString("en-US", {
                         month: "short",
@@ -595,8 +603,12 @@ export default function ProfilePage() {
                   <div className="flex flex-wrap items-center gap-1 sm:gap-2">
                     {(post.city?.name || post.cityName) && (
                       <span className="inline-flex items-center rounded-full border border-orange-200 text-orange-700 px-2 sm:px-3 text-xs font-semibold gap-1">
-                        <span className="text-pink-500 text-sm sm:text-base">📍</span>
-                        <span className="truncate max-w-[100px] sm:max-w-none">{post.city?.name || post.cityName}</span>
+                        <span className="text-pink-500 text-sm sm:text-base">
+                          📍
+                        </span>
+                        <span className="truncate max-w-[100px] sm:max-w-none">
+                          {post.city?.name || post.cityName}
+                        </span>
                       </span>
                     )}
                     {(post.category || post.type) && (
@@ -611,7 +623,9 @@ export default function ProfilePage() {
                     )}
                   </div>
                   <div className="flex items-center gap-1 text-gray-600 text-xs sm:text-sm">
-                    <span className="hidden sm:inline mx-1 text-gray-400">•</span>
+                    <span className="hidden sm:inline mx-1 text-gray-400">
+                      •
+                    </span>
                     <span className="hidden sm:inline">Posted by</span>
                     <span className="ml-1 mr-1">
                       <span className="inline-block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gray-200 flex items-center justify-center">
@@ -795,7 +809,9 @@ export default function ProfilePage() {
                     <span className="mx-2">•</span>
                     <span>{formatDate(comment.createdAt)}</span>
                   </div>
-                  <p className="text-gray-700 text-sm sm:text-base">{comment.content}</p>
+                  <p className="text-gray-700 text-sm sm:text-base">
+                    {comment.content}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -946,7 +962,9 @@ export default function ProfilePage() {
             <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
               No reviews yet
             </h3>
-            <p className="text-sm sm:text-base text-gray-600">Your city reviews will appear here</p>
+            <p className="text-sm sm:text-base text-gray-600">
+              Your city reviews will appear here
+            </p>
           </CardContent>
         </Card>
       );
@@ -1061,7 +1079,9 @@ export default function ProfilePage() {
                           className="flex items-center space-x-2 sm:space-x-3"
                         >
                           <div className="flex items-center space-x-1 sm:space-x-2 min-w-[80px] sm:min-w-[100px]">
-                            <Icon className={`w-3 h-3 sm:w-4 sm:h-4 ${cat.color}`} />
+                            <Icon
+                              className={`w-3 h-3 sm:w-4 sm:h-4 ${cat.color}`}
+                            />
                             <span className="text-xs sm:text-sm font-medium text-gray-700">
                               {cat.label}
                             </span>
@@ -1140,7 +1160,9 @@ export default function ProfilePage() {
             <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
               No upvoted posts yet
             </h3>
-            <p className="text-sm sm:text-base text-gray-600">Posts you upvote will appear here</p>
+            <p className="text-sm sm:text-base text-gray-600">
+              Posts you upvote will appear here
+            </p>
           </CardContent>
         </Card>
       );
@@ -1185,8 +1207,12 @@ export default function ProfilePage() {
                   <div className="flex flex-wrap items-center gap-1 sm:gap-2">
                     {(post.city?.name || post.cityName) && (
                       <span className="inline-flex items-center rounded-full border border-orange-200 text-orange-700 px-2 sm:px-3 text-xs font-semibold gap-1">
-                        <span className="text-pink-500 text-sm sm:text-base">📍</span>
-                        <span className="truncate max-w-[100px] sm:max-w-none">{post.city?.name || post.cityName}</span>
+                        <span className="text-pink-500 text-sm sm:text-base">
+                          📍
+                        </span>
+                        <span className="truncate max-w-[100px] sm:max-w-none">
+                          {post.city?.name || post.cityName}
+                        </span>
                       </span>
                     )}
                     {(post.category || post.type) && (
@@ -1201,7 +1227,9 @@ export default function ProfilePage() {
                     )}
                   </div>
                   <div className="flex items-center gap-1 text-gray-600 text-xs sm:text-sm">
-                    <span className="hidden sm:inline mx-1 text-gray-400">•</span>
+                    <span className="hidden sm:inline mx-1 text-gray-400">
+                      •
+                    </span>
                     <span className="hidden sm:inline">Posted by</span>
                     <span className="ml-1 mr-1">
                       <span className="inline-block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gray-200 flex items-center justify-center">
@@ -1354,11 +1382,17 @@ export default function ProfilePage() {
                           {user.username}
                         </h1>
                         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1 sm:gap-2">
-                          <Badge variant="outline" className="text-xs sm:text-sm">
+                          <Badge
+                            variant="outline"
+                            className="text-xs sm:text-sm"
+                          >
                             {getRoleIcon(user.role)} {user.role}
                           </Badge>
                           {user.currentCity && (
-                            <Badge variant="secondary" className="text-xs sm:text-sm">
+                            <Badge
+                              variant="secondary"
+                              className="text-xs sm:text-sm"
+                            >
                               <MapPin className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
                               {user.currentCity}, {user.currentCountry}
                             </Badge>
@@ -1391,14 +1425,12 @@ export default function ProfilePage() {
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
                     <Link href="/profile/edit">
-                      <Button variant="outline" className="w-full sm:w-auto h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm">
+                      <Button
+                        variant="outline"
+                        className="w-full sm:w-auto h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm"
+                      >
                         <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                         Edit Profile
-                      </Button>
-                    </Link>
-                    <Link href="/posts/create">
-                      <Button className="w-full sm:w-auto h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm">
-                        Create Post
                       </Button>
                     </Link>
                   </div>
@@ -1424,7 +1456,9 @@ export default function ProfilePage() {
                 <div className="text-lg sm:text-xl font-bold text-green-600">
                   {stats?.netVotes || 0}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-600">Net Votes</div>
+                <div className="text-xs sm:text-sm text-gray-600">
+                  Net Votes
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-lg sm:text-xl font-bold text-green-600">
@@ -1436,7 +1470,9 @@ export default function ProfilePage() {
                 <div className="text-lg sm:text-xl font-bold text-blue-600">
                   {stats?.postsThisMonth || 0}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-600">This Month</div>
+                <div className="text-xs sm:text-sm text-gray-600">
+                  This Month
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-lg sm:text-xl font-bold text-purple-600">
@@ -1446,53 +1482,45 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Badges */}
-            {badges && badges.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
-                {badges.map((badge) => (
-                  <Badge key={badge.name} className={badge.color}>
-                    <span className="mr-1">{badge.icon}</span>
-                    {badge.name}
-                  </Badge>
-                ))}
-              </div>
-            )}
-
             {/* Content Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="space-y-4 sm:space-y-6 mt-4"
+            >
               {/* Tab Navigation */}
               <div className="bg-white rounded-lg sm:rounded-xl shadow-lg border border-gray-100">
                 <TabsList className="grid grid-cols-2 lg:grid-cols-5 w-full h-auto p-1 sm:p-2 bg-transparent">
-                  <TabsTrigger 
-                    value="posts" 
+                  <TabsTrigger
+                    value="posts"
                     className="text-xs sm:text-sm py-2 sm:py-3 px-2 sm:px-4 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600"
                   >
                     <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Posts
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="comments" 
+                  <TabsTrigger
+                    value="comments"
                     className="text-xs sm:text-sm py-2 sm:py-3 px-2 sm:px-4 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600"
                   >
                     <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Comments
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="reviews" 
+                  <TabsTrigger
+                    value="reviews"
                     className="text-xs sm:text-sm py-2 sm:py-3 px-2 sm:px-4 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600"
                   >
                     <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Reviews
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="saved" 
+                  <TabsTrigger
+                    value="saved"
                     className="text-xs sm:text-sm py-2 sm:py-3 px-2 sm:px-4 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600"
                   >
                     <Bookmark className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Saved
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="upvoted" 
+                  <TabsTrigger
+                    value="upvoted"
                     className="text-xs sm:text-sm py-2 sm:py-3 px-2 sm:px-4 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-600"
                   >
                     <ArrowUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
@@ -1503,23 +1531,38 @@ export default function ProfilePage() {
 
               {/* Tab Content */}
               <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-                <TabsContent value="posts" className="space-y-3 sm:space-y-4 lg:space-y-6">
+                <TabsContent
+                  value="posts"
+                  className="space-y-3 sm:space-y-4 lg:space-y-6"
+                >
                   <PostsSection />
                 </TabsContent>
 
-                <TabsContent value="comments" className="space-y-3 sm:space-y-4 lg:space-y-6">
+                <TabsContent
+                  value="comments"
+                  className="space-y-3 sm:space-y-4 lg:space-y-6"
+                >
                   <CommentsSection />
                 </TabsContent>
 
-                <TabsContent value="reviews" className="space-y-3 sm:space-y-4 lg:space-y-6">
+                <TabsContent
+                  value="reviews"
+                  className="space-y-3 sm:space-y-4 lg:space-y-6"
+                >
                   <ReviewsSection />
                 </TabsContent>
 
-                <TabsContent value="saved" className="space-y-3 sm:space-y-4 lg:space-y-6">
+                <TabsContent
+                  value="saved"
+                  className="space-y-3 sm:space-y-4 lg:space-y-6"
+                >
                   <SavedPostsSection />
                 </TabsContent>
 
-                <TabsContent value="upvoted" className="space-y-3 sm:space-y-4 lg:space-y-6">
+                <TabsContent
+                  value="upvoted"
+                  className="space-y-3 sm:space-y-4 lg:space-y-6"
+                >
                   <UpvotedSection />
                 </TabsContent>
               </div>
@@ -1619,7 +1662,9 @@ export default function ProfilePage() {
               {/* Recent Activity */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base sm:text-lg">Recent Activity</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">
+                    Recent Activity
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
