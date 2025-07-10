@@ -25,8 +25,7 @@ import {
   CityReview,
   Comment,
   Post,
-  Badge as UserBadge,
-  UserStats,
+  UserStats
 } from "@/lib/types";
 import {
   useQuery,
@@ -231,40 +230,40 @@ export default function ProfilePage() {
   });
 
   // Fetch user's badges
-  const { data: badges = [] } = useQuery<UserBadge[]>({
-    queryKey: ["user-badges", user?.id],
-    queryFn: async () => {
-      // Since we don't have a badges endpoint yet, return some sample badges based on user activity
-      const badgesList: UserBadge[] = [];
+  // const { data: badges = [] } = useQuery<UserBadge[]>({
+  //   queryKey: ["user-badges", user?.id],
+  //   queryFn: async () => {
+  //     // Since we don't have a badges endpoint yet, return some sample badges based on user activity
+  //     const badgesList: UserBadge[] = [];
 
-      if (posts.length > 0) {
-        badgesList.push({
-          name: "First Post",
-          icon: "📝",
-          color: "bg-blue-100 text-blue-800",
-        });
-      }
+  //     if (posts.length > 0) {
+  //       badgesList.push({
+  //         name: "First Post",
+  //         icon: "📝",
+  //         color: "bg-blue-100 text-blue-800",
+  //       });
+  //     }
 
-      if (posts.length >= 5) {
-        badgesList.push({
-          name: "Active Writer",
-          icon: "✍️",
-          color: "bg-green-100 text-green-800",
-        });
-      }
+  //     if (posts.length >= 5) {
+  //       badgesList.push({
+  //         name: "Active Writer",
+  //         icon: "✍️",
+  //         color: "bg-green-100 text-green-800",
+  //       });
+  //     }
 
-      if (comments.length >= 10) {
-        badgesList.push({
-          name: "Helpful",
-          icon: "🤝",
-          color: "bg-purple-100 text-purple-800",
-        });
-      }
+  //     if (comments.length >= 10) {
+  //       badgesList.push({
+  //         name: "Helpful",
+  //         icon: "🤝",
+  //         color: "bg-purple-100 text-purple-800",
+  //       });
+  //     }
 
-      return badgesList;
-    },
-    enabled: !!user?.id && !isPostsLoading && !isCommentsLoading,
-  });
+  //     return badgesList;
+  //   },
+  //   enabled: !!user?.id && !isPostsLoading && !isCommentsLoading,
+  // });
 
   // Saved posts and reviews will be fetched lazily via Suspense in their own section
 

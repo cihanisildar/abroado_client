@@ -1,9 +1,8 @@
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import "./globals.css";
-import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "react-hot-toast";
-import logo from "@/public/signaling_18391003.png"
+import "./globals.css";
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
