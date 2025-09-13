@@ -15,7 +15,7 @@ const updateAllPostsQueries = (queryClient: any, postId: string, updateFn: (post
   queryClient.getQueryCache().getAll().forEach((query: any) => {
     if (query.queryKey[0] === 'posts') {
       const queryKey = query.queryKey;
-      const oldData = queryClient.getQueryData<Post[]>(queryKey);
+      const oldData = queryClient.getQueryData(queryKey) as Post[] | undefined;
 
       if (oldData) {
         previousData.set(JSON.stringify(queryKey), oldData);
@@ -185,8 +185,8 @@ export const useUpvotePost = () => {
       return { previousData };
     },
     onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        rollbackAllPostsQueries(queryClient, context.previousData);
+      if (context && typeof context === 'object' && 'previousData' in context) {
+        rollbackAllPostsQueries(queryClient, (context as { previousData: Map<string, Post[]> }).previousData);
       }
     },
     // No onSuccess or onSettled - trust the optimistic update
@@ -222,8 +222,8 @@ export const useDownvotePost = () => {
       return { previousData };
     },
     onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        rollbackAllPostsQueries(queryClient, context.previousData);
+      if (context && typeof context === 'object' && 'previousData' in context) {
+        rollbackAllPostsQueries(queryClient, (context as { previousData: Map<string, Post[]> }).previousData);
       }
     },
     // No onSuccess or onSettled - trust the optimistic update
@@ -259,8 +259,8 @@ export const useRemoveVote = () => {
       return { previousData };
     },
     onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        rollbackAllPostsQueries(queryClient, context.previousData);
+      if (context && typeof context === 'object' && 'previousData' in context) {
+        rollbackAllPostsQueries(queryClient, (context as { previousData: Map<string, Post[]> }).previousData);
       }
     },
     // No onSuccess or onSettled - trust the optimistic update

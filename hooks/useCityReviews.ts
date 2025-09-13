@@ -198,8 +198,8 @@ export const useUpvoteCityReview = () => {
       return { previousData };
     },
     onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        rollbackAllCityReviewsQueries(queryClient, context.previousData);
+      if (context && typeof context === 'object' && 'previousData' in context) {
+        rollbackAllCityReviewsQueries(queryClient, (context as { previousData: Map<string, any> }).previousData);
       }
     },
     // No onSuccess or onSettled - trust the optimistic update
@@ -231,8 +231,8 @@ export const useDownvoteCityReview = () => {
       return { previousData };
     },
     onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        rollbackAllCityReviewsQueries(queryClient, context.previousData);
+      if (context && typeof context === 'object' && 'previousData' in context) {
+        rollbackAllCityReviewsQueries(queryClient, (context as { previousData: Map<string, any> }).previousData);
       }
     },
     // No onSuccess or onSettled - trust the optimistic update
@@ -264,8 +264,8 @@ export const useRemoveCityReviewVote = () => {
       return { previousData };
     },
     onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        rollbackAllCityReviewsQueries(queryClient, context.previousData);
+      if (context && typeof context === 'object' && 'previousData' in context) {
+        rollbackAllCityReviewsQueries(queryClient, (context as { previousData: Map<string, any> }).previousData);
       }
     },
     // No onSuccess or onSettled - trust the optimistic update
