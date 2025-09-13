@@ -26,12 +26,12 @@ export async function getPosts(uiFilters?: PostsUIFilters): Promise<Post[]> {
   const queryString = buildQueryString(apiFilters as Record<string, string | number | boolean | string[] | number[] | boolean[] | null | undefined>);
   const endpoint = `/posts${queryString}`;
   
-  return serverFetch<Post[]>(endpoint, { requireAuth: false });
+  return serverFetch<Post[]>(endpoint, { requireAuth: true });
 }
 
 export async function getPost(postId: string): Promise<Post | null> {
   try {
-    return await serverFetch<Post>(`/posts/${postId}`);
+    return await serverFetch<Post>(`/posts/${postId}`, { requireAuth: true });
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
       return null;
@@ -42,7 +42,7 @@ export async function getPost(postId: string): Promise<Post | null> {
 
 export async function getPostComments(postId: string): Promise<Comment[]> {
   try {
-    return await serverFetch<Comment[]>(`/posts/${postId}/comments`);
+    return await serverFetch<Comment[]>(`/posts/${postId}/comments`, { requireAuth: true });
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
       return [];

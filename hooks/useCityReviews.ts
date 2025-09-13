@@ -1,6 +1,49 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { CityReview } from "@/lib/types";
+
+// Helper function to update all city reviews queries optimistically
+const updateAllCityReviewsQueries = (queryClient: any, cityReviewId: string, updateFn: (review: any) => any) => {
+  const previousData = new Map();
+
+  queryClient.getQueryCache().getAll().forEach((query: any) => {
+    if (query.queryKey[0] === 'allCityReviews' || query.queryKey[0] === 'cityReviews') {
+      const queryKey = query.queryKey;
+      const oldData = queryClient.getQueryData(queryKey);
+
+      if (oldData) {
+        previousData.set(JSON.stringify(queryKey), oldData);
+
+        if (oldData.data && Array.isArray(oldData.data)) {
+          // Handle {data: [...]} structure
+          const newData = {
+            ...oldData,
+            data: oldData.data.map((review: any) =>
+              review.id === cityReviewId ? updateFn(review) : review
+            ),
+          };
+          queryClient.setQueryData(queryKey, newData);
+        } else if (Array.isArray(oldData)) {
+          // Handle direct array structure
+          const newData = oldData.map((review: any) =>
+            review.id === cityReviewId ? updateFn(review) : review
+          );
+          queryClient.setQueryData(queryKey, newData);
+        }
+      }
+    }
+  });
+
+  return previousData;
+};
+
+// Helper function to rollback all city reviews queries
+const rollbackAllCityReviewsQueries = (queryClient: any, previousData: Map<string, any>) => {
+  previousData.forEach((data, queryKeyStr) => {
+    const queryKey = JSON.parse(queryKeyStr);
+    queryClient.setQueryData(queryKey, data);
+  });
+};
 import {
   CityReviewsPagination,
   CityReviewsResponse,
@@ -137,11 +180,29 @@ export const useUpvoteCityReview = () => {
       const response = await api.post(`/reviews/${body.cityReviewId}/upvote`);
       return response.data;
     },
-    onSuccess: () => {
-      // Invalidate all city reviews queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ["cityReviews"] });
-      queryClient.invalidateQueries({ queryKey: ["allCityReviews"] });
+    onMutate: async ({ cityReviewId }) => {
+      await queryClient.cancelQueries({ queryKey: ["allCityReviews"] });
+      await queryClient.cancelQueries({ queryKey: ["cityReviews"] });
+
+      const previousData = updateAllCityReviewsQueries(queryClient, cityReviewId, (review) => ({
+        ...review,
+        userVote: review.userVote === "UPVOTE" ? null : "UPVOTE",
+        upvotes: review.userVote === "UPVOTE"
+          ? Math.max(0, (review.upvotes || 0) - 1)
+          : (review.upvotes || 0) + 1,
+        downvotes: review.userVote === "DOWNVOTE"
+          ? Math.max(0, (review.downvotes || 0) - 1)
+          : review.downvotes || 0
+      }));
+
+      return { previousData };
     },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        rollbackAllCityReviewsQueries(queryClient, context.previousData);
+      }
+    },
+    // No onSuccess or onSettled - trust the optimistic update
   });
 };
 
@@ -152,11 +213,29 @@ export const useDownvoteCityReview = () => {
       const response = await api.post(`/reviews/${body.cityReviewId}/downvote`);
       return response.data;
     },
-    onSuccess: () => {
-      // Invalidate all city reviews queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ["cityReviews"] });
-      queryClient.invalidateQueries({ queryKey: ["allCityReviews"] });
+    onMutate: async ({ cityReviewId }) => {
+      await queryClient.cancelQueries({ queryKey: ["allCityReviews"] });
+      await queryClient.cancelQueries({ queryKey: ["cityReviews"] });
+
+      const previousData = updateAllCityReviewsQueries(queryClient, cityReviewId, (review) => ({
+        ...review,
+        userVote: review.userVote === "DOWNVOTE" ? null : "DOWNVOTE",
+        downvotes: review.userVote === "DOWNVOTE"
+          ? Math.max(0, (review.downvotes || 0) - 1)
+          : (review.downvotes || 0) + 1,
+        upvotes: review.userVote === "UPVOTE"
+          ? Math.max(0, (review.upvotes || 0) - 1)
+          : review.upvotes || 0
+      }));
+
+      return { previousData };
     },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        rollbackAllCityReviewsQueries(queryClient, context.previousData);
+      }
+    },
+    // No onSuccess or onSettled - trust the optimistic update
   });
 };
 
@@ -167,11 +246,29 @@ export const useRemoveCityReviewVote = () => {
       const response = await api.delete(`/reviews/${body.cityReviewId}/vote`);
       return response.data;
     },
-    onSuccess: () => {
-      // Invalidate all city reviews queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ["cityReviews"] });
-      queryClient.invalidateQueries({ queryKey: ["allCityReviews"] });
+    onMutate: async ({ cityReviewId }) => {
+      await queryClient.cancelQueries({ queryKey: ["allCityReviews"] });
+      await queryClient.cancelQueries({ queryKey: ["cityReviews"] });
+
+      const previousData = updateAllCityReviewsQueries(queryClient, cityReviewId, (review) => ({
+        ...review,
+        userVote: null,
+        upvotes: review.userVote === "UPVOTE"
+          ? Math.max(0, (review.upvotes || 0) - 1)
+          : review.upvotes || 0,
+        downvotes: review.userVote === "DOWNVOTE"
+          ? Math.max(0, (review.downvotes || 0) - 1)
+          : review.downvotes || 0
+      }));
+
+      return { previousData };
     },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        rollbackAllCityReviewsQueries(queryClient, context.previousData);
+      }
+    },
+    // No onSuccess or onSettled - trust the optimistic update
   });
 };
 

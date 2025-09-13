@@ -111,8 +111,6 @@ function CitiesPageContent() {
     upvoteMutation.mutate(
       { cityReviewId },
       {
-        onSuccess: () => {
-        },
         onError: (error) => {
           console.error("Upvote failed:", error.message);
         },
@@ -124,8 +122,6 @@ function CitiesPageContent() {
     downvoteMutation.mutate(
       { cityReviewId },
       {
-        onSuccess: () => {
-        },
         onError: (error) => {
           console.error("Downvote failed:", error.message);
         },

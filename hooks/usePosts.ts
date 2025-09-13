@@ -1,12 +1,40 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import type { 
-  Post, 
-  Comment, 
-  PostTag, 
-  PostCategory, 
+import type {
+  Post,
+  Comment,
+  PostTag,
+  PostCategory,
 } from '@/lib/types';
 import { PostsFilters } from '@/lib/types/api.types';
+
+// Helper function to update all posts queries optimistically
+const updateAllPostsQueries = (queryClient: any, postId: string, updateFn: (post: Post) => Post) => {
+  const previousData = new Map();
+
+  queryClient.getQueryCache().getAll().forEach((query: any) => {
+    if (query.queryKey[0] === 'posts') {
+      const queryKey = query.queryKey;
+      const oldData = queryClient.getQueryData<Post[]>(queryKey);
+
+      if (oldData) {
+        previousData.set(JSON.stringify(queryKey), oldData);
+        const newData = oldData.map((post) => post.id === postId ? updateFn(post) : post);
+        queryClient.setQueryData(queryKey, newData);
+      }
+    }
+  });
+
+  return previousData;
+};
+
+// Helper function to rollback all posts queries
+const rollbackAllPostsQueries = (queryClient: any, previousData: Map<string, Post[]>) => {
+  previousData.forEach((data, queryKeyStr) => {
+    const queryKey = JSON.parse(queryKeyStr);
+    queryClient.setQueryData(queryKey, data);
+  });
+};
 
 export const usePosts = (filters?: PostsFilters) => {
   return useQuery<Post[]>({
@@ -132,18 +160,36 @@ export const useUpvotePost = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
-    { success: boolean; post: Post }, 
-    Error, 
+    { success: boolean; message?: string },
+    Error,
     { postId: string }
   >({
     mutationFn: async ({ postId }) => {
       const response = await api.post(`/posts/${postId}/upvote`);
       return response.data;
     },
-    onSuccess: () => {
-      // Invalidate all post-related queries to get fresh data
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    onMutate: async ({ postId }) => {
+      await queryClient.cancelQueries({ queryKey: ['posts'] });
+
+      const previousData = updateAllPostsQueries(queryClient, postId, (post) => ({
+        ...post,
+        userVote: post.userVote === 'UPVOTE' ? null : 'UPVOTE' as const,
+        upvotes: post.userVote === 'UPVOTE'
+          ? Math.max(0, (post.upvotes || 0) - 1)
+          : (post.upvotes || 0) + 1,
+        downvotes: post.userVote === 'DOWNVOTE'
+          ? Math.max(0, (post.downvotes || 0) - 1)
+          : post.downvotes || 0
+      }));
+
+      return { previousData };
     },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        rollbackAllPostsQueries(queryClient, context.previousData);
+      }
+    },
+    // No onSuccess or onSettled - trust the optimistic update
   });
 };
 
@@ -151,18 +197,36 @@ export const useDownvotePost = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
-    { success: boolean; post: Post }, 
-    Error, 
+    { success: boolean; message?: string },
+    Error,
     { postId: string }
   >({
     mutationFn: async ({ postId }) => {
       const response = await api.post(`/posts/${postId}/downvote`);
       return response.data;
     },
-    onSuccess: () => {
-      // Invalidate all post-related queries to get fresh data
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    onMutate: async ({ postId }) => {
+      await queryClient.cancelQueries({ queryKey: ['posts'] });
+
+      const previousData = updateAllPostsQueries(queryClient, postId, (post) => ({
+        ...post,
+        userVote: post.userVote === 'DOWNVOTE' ? null : 'DOWNVOTE' as const,
+        downvotes: post.userVote === 'DOWNVOTE'
+          ? Math.max(0, (post.downvotes || 0) - 1)
+          : (post.downvotes || 0) + 1,
+        upvotes: post.userVote === 'UPVOTE'
+          ? Math.max(0, (post.upvotes || 0) - 1)
+          : post.upvotes || 0
+      }));
+
+      return { previousData };
     },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        rollbackAllPostsQueries(queryClient, context.previousData);
+      }
+    },
+    // No onSuccess or onSettled - trust the optimistic update
   });
 };
 
@@ -170,18 +234,36 @@ export const useRemoveVote = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
-    { success: boolean; post: Post }, 
-    Error, 
+    { success: boolean; message?: string },
+    Error,
     { postId: string }
   >({
     mutationFn: async ({ postId }) => {
       const response = await api.delete(`/posts/${postId}/vote`);
       return response.data;
     },
-    onSuccess: () => {
-      // Invalidate all post-related queries to get fresh data
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    onMutate: async ({ postId }) => {
+      await queryClient.cancelQueries({ queryKey: ['posts'] });
+
+      const previousData = updateAllPostsQueries(queryClient, postId, (post) => ({
+        ...post,
+        userVote: null,
+        upvotes: post.userVote === 'UPVOTE'
+          ? Math.max(0, (post.upvotes || 0) - 1)
+          : post.upvotes || 0,
+        downvotes: post.userVote === 'DOWNVOTE'
+          ? Math.max(0, (post.downvotes || 0) - 1)
+          : post.downvotes || 0
+      }));
+
+      return { previousData };
     },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        rollbackAllPostsQueries(queryClient, context.previousData);
+      }
+    },
+    // No onSuccess or onSettled - trust the optimistic update
   });
 };
 

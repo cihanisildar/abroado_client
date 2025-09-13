@@ -1,8 +1,13 @@
+'use client';
+
 import Link from 'next/link';
 import { MessageSquare } from 'lucide-react';
 import { InteractivePost } from '@/components/client/InteractivePost';
+import { usePosts } from '@/hooks/usePosts';
 import type { Post } from '@/lib/types';
 import { PostsFilters } from '@/lib/types/api.types';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 interface PostsListProps {
   initialPosts: Post[];
@@ -10,24 +15,34 @@ interface PostsListProps {
 }
 
 export function PostsList({ initialPosts, filters }: PostsListProps) {
-  if (initialPosts.length === 0) {
+  const queryClient = useQueryClient();
+
+  // Set initial data in the cache
+  useEffect(() => {
+    queryClient.setQueryData(['posts', filters], initialPosts);
+  }, [initialPosts, filters, queryClient]);
+
+  // Use the client-side query (will use cached data initially)
+  const { data: posts = initialPosts } = usePosts(filters);
+
+  if (posts.length === 0) {
     return <EmptyState filters={filters} />;
   }
 
   return (
     <div className="space-y-6">
-      {initialPosts.map((post) => (
-        <InteractivePost 
-          key={post.id} 
-          post={post} 
+      {posts.map((post) => (
+        <InteractivePost
+          key={post.id}
+          post={post}
           showActions={true}
         />
       ))}
-      
+
       {/* Load More - This would be handled by client component */}
       <div className="text-center py-8">
         <p className="text-sm text-gray-500">
-          Showing {initialPosts.length} posts
+          Showing {posts.length} posts
         </p>
       </div>
     </div>

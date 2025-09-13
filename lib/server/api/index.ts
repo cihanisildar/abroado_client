@@ -23,6 +23,13 @@ export {
   getCity,
 } from './cities';
 
+// City Reviews API
+export {
+  getAllCityReviews,
+  getCityReview,
+  getReviewCountries,
+} from './cityReviews';
+
 // Countries API
 export {
   getCountries,
