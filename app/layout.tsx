@@ -1,4 +1,8 @@
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { SocketProvider } from "@/lib/contexts/SocketContext";
+import { HeaderWrapper } from "@/components/HeaderWrapper";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import OAuthCallbackHandler from "@/components/OAuthCallbackHandler";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "react-hot-toast";
@@ -44,7 +48,19 @@ export default function RootLayout({
         className={`${poppins.variable} antialiased bg-gray-50 font-sans`}
       >
         <QueryProvider>
-          {children}
+          <SocketProvider>
+            <OAuthCallbackHandler />
+            <div className="min-h-screen bg-gray-50">
+              <ErrorBoundary>
+                <HeaderWrapper />
+              </ErrorBoundary>
+              <main>
+                <ErrorBoundary>
+                  {children}
+                </ErrorBoundary>
+              </main>
+            </div>
+          </SocketProvider>
           <Toaster 
             position="top-right"
             toastOptions={{

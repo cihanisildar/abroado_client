@@ -116,7 +116,8 @@ export function CityReviewCommentItem({
 
   const handleVote = async (voteType: 'UPVOTE' | 'DOWNVOTE') => {
     if (!user) {
-      toast.error('Please login to vote on comments');
+      // Redirect to login without showing toast
+      window.location.href = `/auth/login?redirectTo=${encodeURIComponent(window.location.pathname + window.location.search)}`;
       return;
     }
 

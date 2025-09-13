@@ -24,8 +24,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import logo from "@/public/signaling_18391003.png";
-import Image from "next/image";
+import GoogleAuthButton from "@/components/ui/GoogleAuthButton";
 
 interface RegisterFormData {
   email: string;
@@ -137,21 +136,14 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-100 via-white to-orange-50">
-      <div className="container mx-auto px-4 py-8 lg:py-12">
+      <div className="container mx-auto px-4 pt-20 pb-8 lg:pt-24 lg:pb-12">
         <div className="flex justify-center items-center">
           {/* Registration Form */}
           <div className="w-full max-w-md mx-auto">
             <Card className="overflow-hidden border border-orange-100/50 shadow-xl shadow-orange-100/20 bg-white/70 backdrop-blur-sm">
               <CardHeader className="text-center pb-6 pt-8 px-6">
-                <div className="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-50 rounded-[2rem] rotate-[10deg] mx-auto mb-4 flex items-center justify-center transform transition-transform hover:rotate-0 duration-300">
-                  <Image
-                    src={logo}
-                    alt="Abroado Signpost"
-                    className="w-7 h-7"
-                  />
-                </div>
                 <CardTitle className="text-2xl font-bold bg-gradient-to-br from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
-                  Join Abroado
+                  Create Account
                 </CardTitle>
                 <CardDescription className="text-gray-500">
                   Start your journey abroad today
@@ -159,6 +151,23 @@ export default function RegisterPage() {
               </CardHeader>
 
               <CardContent className="px-6 pb-6">
+                {/* Google OAuth Button */}
+                <GoogleAuthButton 
+                  className="w-full mb-4" 
+                  variant="outline"
+                  size="default"
+                />
+                
+                {/* Divider - Only show if we have a Google button */}
+                <div className="relative mb-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">Or create account with email</span>
+                  </div>
+                </div>
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Username & Email Row */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

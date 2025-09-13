@@ -11,6 +11,7 @@ export interface User {
   avatar: string | null;
   isOnline: boolean;
   lastSeen: string;
+  googleId?: string | null;
   createdAt: string;
   updatedAt: string;
 }

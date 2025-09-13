@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthAction } from "@/utils/authHelpers";
 import { useCountries } from "@/hooks/useCountries";
 import {
   useJoinRoom,
@@ -34,7 +35,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import toast from "react-hot-toast";
 
 interface ApiError {
@@ -46,7 +47,7 @@ interface ApiError {
   message?: string;
 }
 
-export default function RoomsPage() {
+function RoomsPageContent() {
   const searchParamsHook = useSearchParams();
   const initialQuery = searchParamsHook.get("q") || "";
   const [searchTerm, setSearchTerm] = useState(initialQuery);
@@ -66,6 +67,7 @@ export default function RoomsPage() {
   const joinRoomMutation = useJoinRoom();
   const leaveRoomMutation = useLeaveRoom();
   useAuth();
+  const { requireAuth } = useAuthAction();
 
   useEffect(() => {
     setSearchTerm(initialQuery);
@@ -140,46 +142,50 @@ export default function RoomsPage() {
     }
   });
 
-  // Join room with toast feedback
-  const handleJoinRoom = async (roomId: string) => {
-    const loadingToast = toast.loading("Joining room...");
+  // Join room with authentication check
+  const handleJoinRoom = (roomId: string) => {
+    requireAuth(async () => {
+      const loadingToast = toast.loading("Joining room...");
 
-    try {
-      await joinRoomMutation.mutateAsync(roomId);
-      toast.dismiss(loadingToast);
-      toast.success("Successfully joined the room! 🎉");
-    } catch (error: unknown) {
-      console.error("Failed to join room:", error);
-      toast.dismiss(loadingToast);
+      try {
+        await joinRoomMutation.mutateAsync(roomId);
+        toast.dismiss(loadingToast);
+        toast.success("Successfully joined the room! 🎉");
+      } catch (error: unknown) {
+        console.error("Failed to join room:", error);
+        toast.dismiss(loadingToast);
 
-      const apiError = error as ApiError;
-      const errorMessage =
-        apiError?.response?.data?.message ||
-        apiError?.message ||
-        "Failed to join room";
-      toast.error(`Failed to join room: ${errorMessage}`);
-    }
+        const apiError = error as ApiError;
+        const errorMessage =
+          apiError?.response?.data?.message ||
+          apiError?.message ||
+          "Failed to join room";
+        toast.error(`Failed to join room: ${errorMessage}`);
+      }
+    });
   };
 
-  // Leave room with toast feedback
-  const handleLeaveRoom = async (roomId: string) => {
-    const loadingToast = toast.loading("Leaving room...");
+  // Leave room with authentication check
+  const handleLeaveRoom = (roomId: string) => {
+    requireAuth(async () => {
+      const loadingToast = toast.loading("Leaving room...");
 
-    try {
-      await leaveRoomMutation.mutateAsync(roomId);
-      toast.dismiss(loadingToast);
-      toast.success("Successfully left the room");
-    } catch (error: unknown) {
-      console.error("Failed to leave room:", error);
-      toast.dismiss(loadingToast);
+      try {
+        await leaveRoomMutation.mutateAsync(roomId);
+        toast.dismiss(loadingToast);
+        toast.success("Successfully left the room");
+      } catch (error: unknown) {
+        console.error("Failed to leave room:", error);
+        toast.dismiss(loadingToast);
 
-      const apiError = error as ApiError;
-      const errorMessage =
-        apiError?.response?.data?.message ||
-        apiError?.message ||
-        "Failed to leave room";
-      toast.error(`Failed to leave room: ${errorMessage}`);
-    }
+        const apiError = error as ApiError;
+        const errorMessage =
+          apiError?.response?.data?.message ||
+          apiError?.message ||
+          "Failed to leave room";
+        toast.error(`Failed to leave room: ${errorMessage}`);
+      }
+    });
   };
 
   if (isLoading) {
@@ -600,5 +606,20 @@ export default function RoomsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RoomsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 text-center">Loading chat rooms...</p>
+        </div>
+      </div>
+    }>
+      <RoomsPageContent />
+    </Suspense>
   );
 }

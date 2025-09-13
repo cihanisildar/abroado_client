@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { toast } from "react-hot-toast";
 import {
   Select,
@@ -80,7 +80,7 @@ interface CityReviewsResponse {
   data: CityReview[];
 }
 
-export default function CitiesPage() {
+function CitiesPageContent() {
   const searchParamsHook = useSearchParams();
   const initialQuery = searchParamsHook.get("q") || "";
   const [searchTerm, setSearchTerm] = useState(initialQuery);
@@ -111,8 +111,7 @@ export default function CitiesPage() {
     upvoteMutation.mutate(
       { cityReviewId },
       {
-        onSuccess: (data) => {
-          console.log("Upvote successful:", data.message);
+        onSuccess: () => {
         },
         onError: (error) => {
           console.error("Upvote failed:", error.message);
@@ -125,8 +124,7 @@ export default function CitiesPage() {
     downvoteMutation.mutate(
       { cityReviewId },
       {
-        onSuccess: (data) => {
-          console.log("Downvote successful:", data.message);
+        onSuccess: () => {
         },
         onError: (error) => {
           console.error("Downvote failed:", error.message);
@@ -857,5 +855,20 @@ export default function CitiesPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CitiesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 text-center">Loading city reviews...</p>
+        </div>
+      </div>
+    }>
+      <CitiesPageContent />
+    </Suspense>
   );
 }

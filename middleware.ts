@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Define protected and auth routes
-const protectedRoutes = ['/', '/cities', '/posts', '/rooms', '/profile'];
+// Define routes that are completely public (no auth needed for viewing)
+const publicRoutes = ['/', '/cities', '/posts', '/rooms'];
+// Define routes that require full authentication  
+const protectedRoutes = ['/profile', '/settings'];
+// Define auth routes
 const authRoutes = ['/auth/login', '/auth/register'];
 
 export function middleware(request: NextRequest) {
@@ -16,18 +19,35 @@ export function middleware(request: NextRequest) {
   // The client will handle refreshing the access token.
   const isAuthenticated = Boolean(refreshToken);
   
-  // Check if current path is protected
+  // Check route types
+  const isPublicRoute = publicRoutes.some(route => 
+    pathname === route || pathname.startsWith(route + '/')
+  );
+  
   const isProtectedRoute = protectedRoutes.some(route => 
     pathname === route || pathname.startsWith(route + '/')
   );
   
-  // Check if current path is auth route
   const isAuthRoute = authRoutes.some(route => 
     pathname === route || pathname.startsWith(route + '/')
   );
   
-  // Only redirect to login if user has neither access token nor refresh token
-  if (isProtectedRoute && !isAuthenticated) {
+  // Check for creation/editing routes that require authentication
+  const isActionRoute = pathname.includes('/create') || 
+                        pathname.includes('/edit') || 
+                        pathname.endsWith('/edit');
+  
+  // Individual room pages are public for viewing but require auth for interactions
+  // Authentication for room interactions is handled at the component level
+  const isRoomDetailPage = pathname.match(/^\/rooms\/[^\/]+$/);
+  
+  // Determine if this is a route that requires authentication
+  // Only protected routes and action routes need auth at middleware level
+  // Room detail pages allow public viewing but require auth for interactions
+  const requiresAuth = isProtectedRoute || isActionRoute;
+  
+  // Redirect to login for routes that require authentication
+  if (requiresAuth && !isAuthenticated) {
     const loginUrl = new URL('/auth/login', request.url);
     loginUrl.searchParams.set('redirectTo', pathname + request.nextUrl.search);
     return NextResponse.redirect(loginUrl);

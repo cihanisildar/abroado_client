@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/hooks/useAuth';
 import { useCountries } from '@/hooks/useCountries';
 import { useCities } from '@/hooks/useCities';
+import GoogleAccountSection from '@/components/ui/GoogleAccountSection';
 import { 
   ArrowLeft, 
   MapPin, 
@@ -381,6 +382,9 @@ export default function EditProfilePage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Google Account Section */}
+          <GoogleAccountSection />
 
           {/* Form Actions */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">

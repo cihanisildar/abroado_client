@@ -18,7 +18,6 @@ export const useCountries = () => {
     queryKey: ['countries'],
     queryFn: async () => {
       const response = await api.get<CountriesResponse>('/countries');
-      console.log('Countries API Response:', response.data);
 
       // Check for duplicate codes
       const countries = response.data.data;

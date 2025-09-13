@@ -169,7 +169,6 @@ export const handleApiError = (error: unknown, context: string = 'operation'): v
   // Improved Axios error extraction
   if (isAxiosErrorResponse(error) && error.response?.data) {
     const data = error.response.data;
-    console.log('Axios error.response.data:', data); // Debug log
     let errorText = '';
     if ('error' in data && typeof data.error === 'string') {
       errorText = data.error;

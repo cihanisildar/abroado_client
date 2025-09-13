@@ -1,12 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { Post, Comment, PostTag, PostCategory } from '@/lib/types';
+import type { 
+  Post, 
+  Comment, 
+  PostTag, 
+  PostCategory, 
+} from '@/lib/types';
+import { PostsFilters } from '@/lib/types/api.types';
 
-export const usePosts = (filters?: {
-  tags?: string[];
-  country?: string;
-  search?: string;
-}) => {
+export const usePosts = (filters?: PostsFilters) => {
   return useQuery<Post[]>({
     queryKey: ['posts', filters],
     queryFn: async () => {
@@ -39,15 +41,26 @@ export const usePost = (postId: string) => {
         
         // Fallback for direct data response
         return response.data;
-      } catch (error: any) {
-        console.error(`Failed to fetch post ${postId}:`, error?.response?.data || error.message);
+      } catch (error) {
+        const errorMessage = error instanceof Error 
+          ? error.message 
+          : 'Unknown error occurred';
+        
+        let responseData = 'No response data';
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response?: { data?: unknown } };
+          responseData = axiosError.response?.data ? String(axiosError.response.data) : 'No response data';
+        }
+        
+        console.error(`Failed to fetch post ${postId}:`, responseData, errorMessage);
         throw error;
       }
     },
     enabled: !!postId && postId !== 'undefined' && postId.trim() !== '',
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: Error) => {
       // Don't retry on 500 errors (server issues) or 404 (not found)
-      if (error?.response?.status === 500 || error?.response?.status === 404) {
+      const axiosError = error as Error & { response?: { status?: number } };
+      if (axiosError?.response?.status === 500 || axiosError?.response?.status === 404) {
         return false;
       }
       return failureCount < 2;
@@ -79,7 +92,6 @@ export const useCreatePost = () => {
         }
         postData.images.forEach(image => formData.append('images', image));
 
-        console.log('Creating post with FormData (including images)');
         
         const response = await api.post('/posts', formData, {
           headers: {
@@ -101,7 +113,6 @@ export const useCreatePost = () => {
           ...(postData.cityId && { cityId: postData.cityId })
         };
 
-        console.log('Creating post with JSON data:', requestBody);
         
         const response = await api.post('/posts', requestBody);
         

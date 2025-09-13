@@ -35,46 +35,17 @@ export const useCities = (
           params.search = search;
         }
 
-        // Debug: Request details
-        console.group('🌆 Cities API Request');
-        console.log('URL:', '/cities' + (params.country ? `?country=${encodeURIComponent(params.country)}` : ''));
-        console.log('Parameters:', params);
-        console.groupEnd();
 
         const response = await api.get<CitiesResponse>('/cities', { params });
 
-        // Debug: Response details
-        console.group('🌆 Cities API Response');
-        console.log('Status:', response.status);
-        console.log('Response:', response.data);
-        
         if (!response.data || !Array.isArray(response.data.data)) {
           throw new Error('Invalid response format from cities API');
         }
-
-        console.log('Cities Count:', response.data.data.length);
-        
-        if (response.data.data.length > 0) {
-          console.log('First City:', response.data.data[0]);
-          console.log('Last City:', response.data.data[response.data.data.length - 1]);
-        } else {
-          console.log('⚠️ No cities found with parameters:', params);
-        }
-        console.groupEnd();
 
         return {
           data: response.data.data
         };
       } catch (error: any) {
-        // Debug: Error details
-        console.group('❌ Cities API Error');
-        console.error('Error:', error);
-        console.error('Message:', error?.message);
-        if (error?.response) {
-          console.error('Response Data:', error.response.data);
-          console.error('Response Status:', error.response.status);
-        }
-        console.groupEnd();
         throw error;
       }
     },

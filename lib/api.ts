@@ -1,6 +1,6 @@
 // api.ts
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { AuthResponse } from './types';
+import type { AuthResponse } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -9,7 +9,7 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // 🔑 Always include cookies in requests
+  withCredentials: true, // 🔑 SECURITY: Always include httpOnly cookies for authentication
 });
 
 // Store reference to refresh function
@@ -21,10 +21,12 @@ export const setRefreshTokenFn = (fn: (() => Promise<AuthResponse>) | null) => {
 };
 
 let isRefreshing = false;
-let failedQueue: Array<{
+interface FailedRequest {
   resolve: (value?: unknown) => void;
   reject: (error?: unknown) => void;
-}> = [];
+}
+
+let failedQueue: FailedRequest[] = [];
 
 const processQueue = (error: unknown) => {
   failedQueue.forEach(({ resolve, reject }) => {
@@ -70,7 +72,7 @@ api.interceptors.response.use(
         if (refreshTokenFn) {
           await refreshTokenFn();
         } else {
-          // Fallback to direct API call
+          // Fallback to direct API call using httpOnly cookies
           await api.post('/auth/refresh');
         }
         
@@ -80,9 +82,13 @@ api.interceptors.response.use(
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, reject the promise. Don't redirect here.
-        // The UI layer (useAuth hook) will catch this and handle the redirect.
+        // Refresh failed - clear any stale auth state
         processQueue(refreshError);
+        
+        // Redirect to login page if we're in browser environment
+        if (typeof window !== 'undefined') {
+          window.location.href = '/auth/login';
+        }
         
         return Promise.reject(refreshError);
       } finally {

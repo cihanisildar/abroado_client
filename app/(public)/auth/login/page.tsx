@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,7 @@ import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import logo from "@/public/signaling_18391003.png"
+import GoogleAuthButton from "@/components/ui/GoogleAuthButton"
 interface LoginFormData {
   email: string
   password: string
@@ -30,8 +31,13 @@ export default function LoginPage() {
   })
 
   const [showPassword, setShowPassword] = useState(false)
-  const { login } = useAuth()
+  const [mounted, setMounted] = useState(false)
+  const { login, googleOAuthStatus } = useAuth()
   const router = useRouter()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleInputChange = (field: keyof LoginFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -72,11 +78,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-100 via-white to-orange-50">
-      <div className="container mx-auto px-4 py-8 lg:py-12">
-        <div className="flex justify-center items-center">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-100 via-white to-orange-50 flex items-center justify-center">
+      <div className="w-full max-w-md mx-auto px-4">
           {/* Login Form */}
-          <div className="w-full max-w-md mx-auto">
             <Card className="overflow-hidden border border-orange-100/50 shadow-xl shadow-orange-100/20 bg-white/70 backdrop-blur-sm">
               <CardHeader className="text-center pb-6 pt-8 px-6">
                 <div className="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-50 rounded-[2rem] rotate-[10deg] mx-auto mb-4 flex items-center justify-center transform transition-transform hover:rotate-0 duration-300">
@@ -87,6 +91,35 @@ export default function LoginPage() {
               </CardHeader>
 
               <CardContent className="px-6 pb-6">
+                {/* Google OAuth Button - Only show one version, avoid hydration issues */}
+                {mounted && (
+                  <>
+                    {googleOAuthStatus.configured ? (
+                      <GoogleAuthButton 
+                        className="w-full mb-4" 
+                        variant="outline"
+                        size="default"
+                      />
+                    ) : (
+                      <GoogleAuthButton 
+                        className="w-full mb-4" 
+                        variant="outline"
+                        size="default"
+                      />
+                    )}
+                    
+                    {/* Divider - Only show if we have a Google button */}
+                    <div className="relative mb-4">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300" />
+                      </div>
+                      <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Email */}
                   <div className="space-y-2">
@@ -171,8 +204,6 @@ export default function LoginPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
       </div>
     </div>
   )

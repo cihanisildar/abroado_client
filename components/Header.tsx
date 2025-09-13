@@ -96,6 +96,16 @@ export function Header() {
 
           {/* Navigation Links & Actions */}
           <div className="hidden md:flex items-center space-x-1 mr-2">
+            <Link href="/posts">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center space-x-2 text-gray-700 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 rounded-xl px-4"
+              >
+                <MessageSquare size={18} />
+                <span className="font-medium">Posts</span>
+              </Button>
+            </Link>
             <Link href="/cities">
               <Button
                 variant="ghost"
@@ -207,7 +217,7 @@ export function Header() {
             <span className="text-xs mt-1 font-medium">Cities</span>
           </Link>
           <Link
-            href="/"
+            href="/posts"
             className="flex flex-col items-center py-3 text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 rounded-xl"
           >
             <MessageSquare size={20} />

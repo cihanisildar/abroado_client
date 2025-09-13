@@ -14,7 +14,7 @@ import { useCreatePost } from '@/hooks/usePosts';
 import { PostCategory, PostTag } from '@/lib/types';
 import { FileText, Hash, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
 const TAG_OPTIONS: { value: PostTag; label: string; description: string }[] = [
@@ -53,7 +53,6 @@ export default function CreatePostPage() {
   const [citySearch, setCitySearch] = useState('');
 
   const { data: countries = [] } = useCountries();
-  console.log('DEBUG: countries from useCountries:', countries);
 
   // Get cities for selected country
   const { 
@@ -65,25 +64,8 @@ export default function CreatePostPage() {
 
   const cities = useMemo(() => citiesResponse?.data || [], [citiesResponse?.data]);
 
-  // Debug country selection state
-  useEffect(() => {
-    console.log('Country selection changed:', {
-      countryName: newPost.countryName,
-      availableCountries: countries.map(c => ({ code: c.code, name: c.name }))
-    });
-  }, [newPost.countryName, countries]);
-
-  // Debug cities state
-  useEffect(() => {
-    console.log('Cities state:', {
-      countryName: newPost.countryName,
-      citiesCount: cities.length,
-      cities: cities.map(c => ({ id: c.id, name: c.name }))
-    });
-  }, [newPost.countryName, cities]);
 
   const handleCountryChange = (value: string) => {
-    console.log('Country selection handler:', { value, type: typeof value });
     
     // Reset city when country changes
     setNewPost(prev => ({
@@ -103,7 +85,6 @@ export default function CreatePostPage() {
     const loadingToast = toast.loading('Creating post...');
     
     try {
-      console.log('Current form state:', newPost);
       
       if (!newPost.title || !newPost.content || !newPost.category) {
         throw new Error('Title, content, and category are required');
@@ -118,13 +99,6 @@ export default function CreatePostPage() {
         ...(newPost.images.length > 0 && { images: newPost.images }),
       };
 
-      console.log('Form state before sending:', newPost);
-      console.log('Sending payload:', postData);
-      console.log('CityId type and value:', { 
-        cityId: newPost.cityId, 
-        type: typeof newPost.cityId,
-        selectedCity: cities.find(c => c.id === newPost.cityId)
-      });
       
       const result = await createPostMutation.mutateAsync(postData);
       
@@ -157,8 +131,6 @@ export default function CreatePostPage() {
     }));
   };
 
-  // Debug countries before rendering dropdown
-  console.log('DEBUG: Rendering countries in dropdown:', countries);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -262,10 +234,6 @@ export default function CreatePostPage() {
                   <Select
                     value={newPost.cityId || 'none'}
                     onValueChange={(value) => {
-                      console.group('🏙️ City Selection Changed');
-                      console.log('Selected Value:', value);
-                      console.log('Selected City:', cities.find(c => c.id === value));
-                      console.groupEnd();
 
                       setNewPost(prev => ({
                         ...prev,
@@ -310,10 +278,6 @@ export default function CreatePostPage() {
                   <Select
                     value={newPost.category || 'none'}
                     onValueChange={(value) => {
-                      console.group('🏷️ Category Selection Changed');
-                      console.log('Selected Value:', value);
-                      console.log('Current category before change:', newPost.category);
-                      console.groupEnd();
 
                       const newCategory: PostCategory | '' = value === 'none' ? '' : value as PostCategory;
                       
@@ -322,7 +286,6 @@ export default function CreatePostPage() {
                           ...prev,
                           category: newCategory
                         };
-                        console.log('Updated post state:', updated);
                         return updated;
                       });
                     }}

@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Settings, Lock, Shield, Bell, Palette, AlertCircle, Save } from 'lucide-react';
+import { Settings, Lock, Shield, Bell, Palette, AlertCircle, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -51,12 +50,6 @@ export default function SettingsPage() {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-            <Link href="/" className="flex items-center text-gray-600 hover:text-orange-500 transition-colors text-sm sm:text-base">
-              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-              Back to Dashboard
-            </Link>
-          </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="p-2 bg-orange-100 rounded-lg">
               <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
